@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        message: {
+          own: "hsl(var(--message-own))",
+          "own-foreground": "hsl(var(--message-own-foreground))",
+          other: "hsl(var(--message-other))",
+          "other-foreground": "hsl(var(--message-other-foreground))",
+        },
+        online: "hsl(var(--online-dot))",
       },
       borderRadius: {
         lg: "var(--radius)",

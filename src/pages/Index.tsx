@@ -1,12 +1,32 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useChat } from '@/hooks/use-chat';
+import { JoinScreen } from '@/components/JoinScreen';
+import { ChatSidebar } from '@/components/ChatSidebar';
+import { ChatArea } from '@/components/ChatArea';
 
 const Index = () => {
+  const { state, joinRoom, leaveRoom, sendMessage, exportHistory, toggleNotifications } = useChat();
+
+  if (!state.isJoined) {
+    return <JoinScreen onJoin={joinRoom} />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="flex h-screen w-full overflow-hidden">
+      <ChatSidebar
+        roomCode={state.roomCode}
+        users={state.users}
+        onLeave={leaveRoom}
+      />
+      <ChatArea
+        messages={state.messages}
+        currentUser={state.username}
+        roomCode={state.roomCode}
+        notificationsEnabled={state.notificationsEnabled}
+        onSend={sendMessage}
+        onExport={exportHistory}
+        onToggleNotifications={toggleNotifications}
+        onLeave={leaveRoom}
+      />
     </div>
   );
 };
