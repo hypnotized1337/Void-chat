@@ -4,7 +4,7 @@ import { ChatSidebar } from '@/components/ChatSidebar';
 import { ChatArea } from '@/components/ChatArea';
 
 const Index = () => {
-  const { state, joinRoom, leaveRoom, sendMessage, exportHistory, toggleNotifications } = useChat();
+  const { state, joinRoom, leaveRoom, sendMessage, sendTyping, exportHistory, toggleNotifications } = useChat();
 
   if (!state.isJoined) {
     return <JoinScreen onJoin={joinRoom} />;
@@ -22,7 +22,9 @@ const Index = () => {
         currentUser={state.username}
         roomCode={state.roomCode}
         notificationsEnabled={state.notificationsEnabled}
+        typingUsers={state.typingUsers}
         onSend={sendMessage}
+        onTyping={sendTyping}
         onExport={exportHistory}
         onToggleNotifications={toggleNotifications}
         onLeave={leaveRoom}

@@ -2,60 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @layer base {
   :root {
-    --background: 230 20% 7%;
-    --foreground: 40 20% 92%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
-    --card: 230 15% 12%;
-    --card-foreground: 40 20% 92%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 0%;
 
-    --popover: 230 15% 12%;
-    --popover-foreground: 40 20% 92%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 38 92% 55%;
-    --primary-foreground: 230 20% 7%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 230 12% 18%;
-    --secondary-foreground: 40 20% 85%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 230 12% 15%;
-    --muted-foreground: 230 10% 55%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 50%;
 
-    --accent: 28 85% 48%;
-    --accent-foreground: 40 20% 95%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 0% 35%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 230 12% 22%;
-    --input: 230 12% 20%;
-    --ring: 38 92% 55%;
+    --border: 0 0% 90%;
+    --input: 0 0% 94%;
+    --ring: 0 0% 0%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* HELIOS custom tokens */
-    --glass-bg: 230 15% 12% / 0.6;
-    --glass-border: 40 20% 80% / 0.08;
-    --glass-blur: 12px;
-    --glow-primary: 38 92% 55% / 0.15;
-    --glow-accent: 28 85% 48% / 0.1;
-    --message-own: 38 92% 55%;
-    --message-own-foreground: 230 20% 7%;
-    --message-other: 230 12% 18%;
-    --message-other-foreground: 40 20% 85%;
-    --online-dot: 142 71% 45%;
+    --message-own: 0 0% 0%;
+    --message-own-foreground: 0 0% 100%;
+    --message-other: 0 0% 94%;
+    --message-other-foreground: 0 0% 0%;
+    --online-dot: 0 0% 40%;
 
-    --sidebar-background: 230 15% 10%;
-    --sidebar-foreground: 40 20% 85%;
-    --sidebar-primary: 38 92% 55%;
-    --sidebar-primary-foreground: 230 20% 7%;
-    --sidebar-accent: 230 12% 18%;
-    --sidebar-accent-foreground: 40 20% 85%;
-    --sidebar-border: 230 12% 22%;
-    --sidebar-ring: 38 92% 55%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 30%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 0 0% 0%;
   }
 }
 
@@ -66,41 +60,11 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
   code, .font-mono {
     font-family: 'JetBrains Mono', monospace;
-  }
-}
-
-@layer components {
-  .glass-panel {
-    background: hsla(var(--glass-bg));
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid hsla(var(--glass-border));
-  }
-
-  .glow-primary {
-    box-shadow: 0 0 40px hsla(var(--glow-primary)),
-                0 0 80px hsla(var(--glow-primary));
-  }
-
-  .glow-accent {
-    box-shadow: 0 0 30px hsla(var(--glow-accent));
-  }
-
-  .glass-input {
-    background: hsla(230 12% 15% / 0.5);
-    backdrop-filter: blur(8px);
-    border: 1px solid hsla(var(--glass-border));
-    transition: all 0.2s ease;
-  }
-
-  .glass-input:focus {
-    border-color: hsl(var(--primary));
-    box-shadow: 0 0 0 2px hsla(var(--glow-primary));
   }
 }
 

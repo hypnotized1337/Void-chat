@@ -13,16 +13,18 @@ export function useChat() {
     users: [],
     isJoined: false,
     notificationsEnabled: false,
+    typingUsers: [],
   });
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const notificationsRef = useRef(state.notificationsEnabled);
   const usernameRef = useRef(state.username);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const remoteTypingTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => { notificationsRef.current = state.notificationsEnabled; }, [state.notificationsEnabled]);
   useEffect(() => { usernameRef.current = state.username; }, [state.username]);
 
-  // Clean up channel on unmount
   useEffect(() => {
     return () => {
       if (channelRef.current) {
@@ -32,15 +34,14 @@ export function useChat() {
   }, []);
 
   const joinRoom = useCallback((username: string, roomCode: string, importedMessages?: ChatMessage[]) => {
-    // Clean up any existing channel
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
     }
 
     const systemMsg: ChatMessage = {
       id: generateId(),
-      username: 'HELIOS',
-      text: `${username} has joined the room.`,
+      username: 'system',
+      text: `${username} joined.`,
       timestamp: Date.now(),
       type: 'system',
     };
@@ -54,36 +55,71 @@ export function useChat() {
       isJoined: true,
       messages: initialMessages,
       users: [],
+      typingUsers: [],
     }));
 
-    // Create realtime channel for this room
     const channel = supabase.channel(`room:${roomCode}`, {
-      config: {
-        presence: { key: username },
-      },
+      config: { presence: { key: username } },
     });
 
-    // Listen for broadcast messages
     channel.on('broadcast', { event: 'message' }, (payload) => {
       const msg = payload.payload as ChatMessage;
-      // Don't duplicate own messages - we already added them optimistically
       if (msg.username === usernameRef.current) return;
+      setState(prev => ({ ...prev, messages: [...prev.messages, { ...msg, status: 'delivered' }] }));
 
-      setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
+      // Auto-mark as read if tab focused
+      if (!document.hidden && channelRef.current) {
+        channelRef.current.send({ type: 'broadcast', event: 'read', payload: { messageId: msg.id, reader: usernameRef.current } });
+      }
 
-      // Send notification if tab not focused
       if (notificationsRef.current && document.hidden) {
-        new Notification(`${msg.username}`, { body: msg.text });
+        new Notification(msg.username, { body: msg.text });
       }
     });
 
-    // Listen for system broadcasts (join/leave)
     channel.on('broadcast', { event: 'system' }, (payload) => {
       const msg = payload.payload as ChatMessage;
       setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
     });
 
-    // Presence: track who's online
+    channel.on('broadcast', { event: 'typing' }, (payload) => {
+      const { username: typingUser } = payload.payload as { username: string };
+      if (typingUser === usernameRef.current) return;
+
+      setState(prev => ({
+        ...prev,
+        typingUsers: prev.typingUsers.includes(typingUser) ? prev.typingUsers : [...prev.typingUsers, typingUser],
+      }));
+
+      if (remoteTypingTimeouts.current[typingUser]) clearTimeout(remoteTypingTimeouts.current[typingUser]);
+      remoteTypingTimeouts.current[typingUser] = setTimeout(() => {
+        setState(prev => ({ ...prev, typingUsers: prev.typingUsers.filter(u => u !== typingUser) }));
+        delete remoteTypingTimeouts.current[typingUser];
+      }, 3000);
+    });
+
+    channel.on('broadcast', { event: 'read' }, (payload) => {
+      const { messageId } = payload.payload as { messageId: string; reader: string };
+      setState(prev => ({
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, status: 'read' } : m),
+      }));
+    });
+
+    // Nuke event
+    channel.on('broadcast', { event: 'nuke' }, () => {
+      setState(prev => ({
+        ...prev,
+        messages: [{
+          id: generateId(),
+          username: 'system',
+          text: 'Session purged.',
+          timestamp: Date.now(),
+          type: 'system',
+        }],
+      }));
+    });
+
     channel.on('presence', { event: 'sync' }, () => {
       const presenceState = channel.presenceState();
       const users: RoomUser[] = Object.keys(presenceState).map(key => ({
@@ -91,17 +127,17 @@ export function useChat() {
         joinedAt: (presenceState[key]?.[0] as any)?.joinedAt ?? Date.now(),
       }));
       setState(prev => ({ ...prev, users }));
+
+      // Auto-purge: if no users left, clear messages
+      if (users.length === 0) {
+        setState(prev => ({ ...prev, messages: [] }));
+      }
     });
 
     channel.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         await channel.track({ username, joinedAt: Date.now() });
-        // Broadcast join event to others
-        channel.send({
-          type: 'broadcast',
-          event: 'system',
-          payload: systemMsg,
-        });
+        channel.send({ type: 'broadcast', event: 'system', payload: systemMsg });
       }
     });
 
@@ -110,19 +146,14 @@ export function useChat() {
 
   const leaveRoom = useCallback(() => {
     if (channelRef.current) {
-      // Broadcast leave before unsubscribing
       const leaveMsg: ChatMessage = {
         id: generateId(),
-        username: 'HELIOS',
-        text: `${usernameRef.current} has left the room.`,
+        username: 'system',
+        text: `${usernameRef.current} left.`,
         timestamp: Date.now(),
         type: 'system',
       };
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'system',
-        payload: leaveMsg,
-      });
+      channelRef.current.send({ type: 'broadcast', event: 'system', payload: leaveMsg });
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
@@ -134,30 +165,51 @@ export function useChat() {
       users: [],
       username: '',
       roomCode: '',
+      typingUsers: [],
     }));
   }, []);
 
   const sendMessage = useCallback((text: string) => {
     if (!text.trim()) return;
+
+    // Secret nuke trigger
+    if (text.trim().toLowerCase() === 'dingus' && channelRef.current) {
+      channelRef.current.send({ type: 'broadcast', event: 'nuke', payload: {} });
+      setState(prev => ({
+        ...prev,
+        messages: [{
+          id: generateId(),
+          username: 'system',
+          text: 'Session purged.',
+          timestamp: Date.now(),
+          type: 'system',
+        }],
+      }));
+      return;
+    }
+
     const msg: ChatMessage = {
       id: generateId(),
       username: usernameRef.current,
       text: text.trim(),
       timestamp: Date.now(),
       type: 'message',
+      status: 'sent',
     };
 
-    // Optimistically add to local state
     setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
 
-    // Broadcast to room
     if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'message',
-        payload: msg,
-      });
+      channelRef.current.send({ type: 'broadcast', event: 'message', payload: msg });
     }
+  }, []);
+
+  const sendTyping = useCallback(() => {
+    if (channelRef.current) {
+      channelRef.current.send({ type: 'broadcast', event: 'typing', payload: { username: usernameRef.current } });
+    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => { typingTimeoutRef.current = null; }, 2000);
   }, []);
 
   const exportHistory = useCallback(() => {
@@ -166,7 +218,7 @@ export function useChat() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'helios_chat.json';
+    a.download = 'chat_export.json';
     a.click();
     URL.revokeObjectURL(url);
   }, [state.messages]);
@@ -184,5 +236,5 @@ export function useChat() {
     }
   }, [state.notificationsEnabled]);
 
-  return { state, joinRoom, leaveRoom, sendMessage, exportHistory, toggleNotifications };
+  return { state, joinRoom, leaveRoom, sendMessage, sendTyping, exportHistory, toggleNotifications };
 }

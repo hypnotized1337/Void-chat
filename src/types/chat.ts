@@ -4,6 +4,7 @@ export interface ChatMessage {
   text: string;
   timestamp: number;
   type: 'message' | 'system';
+  status?: 'sent' | 'delivered' | 'read';
 }
 
 export interface RoomUser {
@@ -18,4 +19,5 @@ export interface ChatState {
   users: RoomUser[];
   isJoined: boolean;
   notificationsEnabled: boolean;
+  typingUsers: string[];
 }
