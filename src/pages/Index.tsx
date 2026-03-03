@@ -8,7 +8,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 const Index = () => {
   const {
     state, joinRoom, leaveRoom, sendMessage, sendTyping,
-    toggleNotifications, nukeRoom, freezeChat, sendAnnouncement, editMessage, unsendMessage,
+    toggleNotifications, nukeRoom, freezeChat, sendAnnouncement, editMessage, unsendMessage, sendImage,
   } = useChat();
   const [adminOpen, setAdminOpen] = useState(false);
 
@@ -45,6 +45,7 @@ const Index = () => {
         onLeave={leaveRoom}
         onEdit={editMessage}
         onUnsend={unsendMessage}
+        onSendImage={sendImage}
       />
       {adminOpen && (
         <AdminPanel

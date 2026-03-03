@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 const generateId = () => Math.random().toString(36).substring(2, 12);
+const TWELVE_HOURS = 12 * 60 * 60 * 1000;
 
 export function useChat() {
   const [state, setState] = useState<ChatState>(() => {
@@ -314,8 +315,52 @@ export function useChat() {
     }
   }, []);
 
+  const sendImage = useCallback(async (file: File, onProgress?: (p: number) => void) => {
+    const ext = file.name.split('.').pop() || 'png';
+    const fileName = `${generateId()}_${Date.now()}.${ext}`;
+    const expiry = Date.now() + TWELVE_HOURS;
+
+    onProgress?.(10);
+
+    const { error } = await supabase.storage
+      .from('chat-images')
+      .upload(fileName, file, { contentType: file.type });
+
+    if (error) {
+      console.error('Upload failed:', error.message);
+      return;
+    }
+
+    onProgress?.(70);
+
+    const { data: urlData } = supabase.storage
+      .from('chat-images')
+      .getPublicUrl(fileName);
+
+    onProgress?.(90);
+
+    const msg: ChatMessage = {
+      id: generateId(),
+      username: usernameRef.current,
+      text: '',
+      timestamp: Date.now(),
+      type: 'message',
+      status: 'sent',
+      imageUrl: urlData.publicUrl,
+      imageExpiry: expiry,
+    };
+
+    setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
+
+    if (channelRef.current) {
+      channelRef.current.send({ type: 'broadcast', event: 'message', payload: msg });
+    }
+
+    onProgress?.(100);
+  }, []);
+
   return {
     state, joinRoom, leaveRoom, sendMessage, sendTyping, exportHistory,
-    toggleNotifications, nukeRoom, freezeChat, sendAnnouncement, editMessage, unsendMessage,
+    toggleNotifications, nukeRoom, freezeChat, sendAnnouncement, editMessage, unsendMessage, sendImage,
   };
 }

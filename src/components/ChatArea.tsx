@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bell, BellOff, LogOut } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, Bell, BellOff, LogOut, Plus } from 'lucide-react';
 import { ChatMessage } from '@/types/chat';
+import { Progress } from '@/components/ui/progress';
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -22,6 +23,14 @@ interface ChatAreaProps {
   onLeave: () => void;
   onEdit: (messageId: string, newText: string) => void;
   onUnsend: (messageId: string) => void;
+  onSendImage: (file: File, onProgress?: (p: number) => void) => void;
+}
+
+const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+
+function isImageExpired(expiry?: number) {
+  if (!expiry) return false;
+  return Date.now() > expiry;
 }
 
 export function ChatArea({
@@ -38,11 +47,17 @@ export function ChatArea({
   onLeave,
   onEdit,
   onUnsend,
+  onSendImage,
 }: ChatAreaProps) {
   const [input, setInput] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCounter = useRef(0);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,6 +84,39 @@ export function ChatArea({
     setEditText('');
   };
 
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!ACCEPTED_TYPES.includes(file.type)) return;
+    setUploading(true);
+    setUploadProgress(0);
+    await onSendImage(file, (p) => setUploadProgress(p));
+    setUploading(false);
+    setUploadProgress(0);
+  }, [onSendImage]);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    setDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current = 0;
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  };
+
   const formatTime = (ts: number) =>
     new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -81,7 +129,20 @@ export function ChatArea({
   const isInputDisabled = frozen && frozenBy !== currentUser;
 
   return (
-    <div className="flex-1 flex flex-col h-screen min-w-0">
+    <div
+      className="flex-1 flex flex-col h-screen min-w-0 relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {dragging && (
+        <div className="absolute inset-0 z-40 bg-background/90 flex items-center justify-center pointer-events-none">
+          <span className="text-foreground text-sm font-medium">Drop image to share</span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card">
         <span className="text-sm font-medium text-foreground">{roomCode}</span>
@@ -102,6 +163,13 @@ export function ChatArea({
       {frozen && (
         <div className="px-4 py-1.5 bg-secondary text-center">
           <span className="text-[11px] text-muted-foreground">Chat frozen{frozenBy ? ` by ${frozenBy}` : ''}</span>
+        </div>
+      )}
+
+      {/* Upload progress */}
+      {uploading && (
+        <div className="px-4 py-2">
+          <Progress value={uploadProgress} className="h-1" />
         </div>
       )}
 
@@ -133,6 +201,7 @@ export function ChatArea({
           }
 
           const isOwn = msg.username === currentUser;
+          const imageExpired = isImageExpired(msg.imageExpiry);
 
           const bubble = (
             <div className="max-w-[75%] space-y-0.5">
@@ -157,6 +226,17 @@ export function ChatArea({
                       : 'bg-message-other text-message-other-foreground rounded-bl-sm'
                   }`}
                 >
+                  {msg.imageUrl && !imageExpired && (
+                    <img
+                      src={msg.imageUrl}
+                      alt="Shared image"
+                      className="max-w-full rounded-lg mb-1 border border-foreground/20 grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer"
+                      loading="lazy"
+                    />
+                  )}
+                  {msg.imageUrl && imageExpired && (
+                    <span className="text-[11px] italic text-muted-foreground">Image expired</span>
+                  )}
                   {msg.text}
                 </div>
               )}
@@ -209,9 +289,30 @@ export function ChatArea({
         </div>
       )}
 
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFileUpload(file);
+          e.target.value = '';
+        }}
+      />
+
       {/* Input */}
       <form onSubmit={handleSubmit} className="p-3 shrink-0">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isInputDisabled}
+            className="p-2.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
           <input
             type="text"
             value={input}

@@ -7,6 +7,8 @@ export interface ChatMessage {
   status?: 'sent' | 'delivered' | 'read';
   edited?: boolean;
   deleted?: boolean;
+  imageUrl?: string;
+  imageExpiry?: number;
 }
 
 export interface RoomUser {
