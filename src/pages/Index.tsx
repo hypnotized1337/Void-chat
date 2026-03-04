@@ -14,7 +14,9 @@ const Index = () => {
 
   const handleSend = (text: string) => {
     if (text.trim() === '/admin') {
-      setAdminOpen(true);
+      if (state.isRoomCreator) {
+        setAdminOpen(true);
+      }
       return;
     }
     sendMessage(text);

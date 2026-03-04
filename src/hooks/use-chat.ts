@@ -51,6 +51,7 @@ export function useChat() {
       typingUsers: [],
       frozen: false,
       frozenBy: null,
+      isRoomCreator: false,
     };
   });
 
@@ -94,6 +95,7 @@ export function useChat() {
       typingUsers: [],
       frozen: false,
       frozenBy: null,
+      isRoomCreator: true,
     }));
 
     const channel = supabase.channel(`room:${roomCode}`, {
@@ -238,6 +240,7 @@ export function useChat() {
       typingUsers: [],
       frozen: false,
       frozenBy: null,
+      isRoomCreator: false,
     }));
   }, []);
 
