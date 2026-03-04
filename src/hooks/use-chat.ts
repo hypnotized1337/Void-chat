@@ -2,9 +2,39 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChatMessage, RoomUser, ChatState } from '@/types/chat';
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { z } from 'zod';
 
 const generateId = () => Math.random().toString(36).substring(2, 12);
 const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+
+// Validation schemas for broadcast payloads
+const ChatMessageSchema = z.object({
+  id: z.string().max(50),
+  username: z.string().max(20),
+  text: z.string().max(5000),
+  timestamp: z.number(),
+  type: z.enum(['message', 'system', 'announcement']),
+  status: z.enum(['sent', 'delivered', 'read']).optional(),
+  edited: z.boolean().optional(),
+  deleted: z.boolean().optional(),
+  imageUrl: z.string().url().max(2000).optional(),
+  imageExpiry: z.number().optional(),
+});
+
+const TypingSchema = z.object({ username: z.string().max(20) });
+const ReadSchema = z.object({ messageId: z.string().max(50), reader: z.string().max(20) });
+const FreezeSchema = z.object({ frozen: z.boolean(), by: z.string().max(20) });
+const EditSchema = z.object({ messageId: z.string().max(50), newText: z.string().max(5000) });
+const UnsendSchema = z.object({ messageId: z.string().max(50) });
+
+function safeParse<T>(schema: z.ZodSchema<T>, data: unknown): T | null {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    console.warn('Invalid broadcast payload rejected:', result.error.message);
+    return null;
+  }
+  return result.data;
+}
 
 export function useChat() {
   const [state, setState] = useState<ChatState>(() => {
@@ -71,9 +101,10 @@ export function useChat() {
     });
 
     channel.on('broadcast', { event: 'message' }, (payload) => {
-      const msg = payload.payload as ChatMessage;
+      const msg = safeParse(ChatMessageSchema, payload.payload);
+      if (!msg) return;
       if (msg.username === usernameRef.current) return;
-      setState(prev => ({ ...prev, messages: [...prev.messages, { ...msg, status: 'delivered' }] }));
+      setState(prev => ({ ...prev, messages: [...prev.messages, { ...msg, status: 'delivered' } as ChatMessage] }));
 
       if (!document.hidden && channelRef.current) {
         channelRef.current.send({ type: 'broadcast', event: 'read', payload: { messageId: msg.id, reader: usernameRef.current } });
@@ -85,17 +116,21 @@ export function useChat() {
     });
 
     channel.on('broadcast', { event: 'system' }, (payload) => {
-      const msg = payload.payload as ChatMessage;
-      setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
+      const msg = safeParse(ChatMessageSchema, payload.payload);
+      if (!msg) return;
+      setState(prev => ({ ...prev, messages: [...prev.messages, msg as ChatMessage] }));
     });
 
     channel.on('broadcast', { event: 'announcement' }, (payload) => {
-      const msg = payload.payload as ChatMessage;
-      setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
+      const msg = safeParse(ChatMessageSchema, payload.payload);
+      if (!msg) return;
+      setState(prev => ({ ...prev, messages: [...prev.messages, msg as ChatMessage] }));
     });
 
     channel.on('broadcast', { event: 'typing' }, (payload) => {
-      const { username: typingUser } = payload.payload as { username: string };
+      const parsed = safeParse(TypingSchema, payload.payload);
+      if (!parsed) return;
+      const typingUser = parsed.username;
       if (typingUser === usernameRef.current) return;
 
       setState(prev => ({
@@ -111,10 +146,11 @@ export function useChat() {
     });
 
     channel.on('broadcast', { event: 'read' }, (payload) => {
-      const { messageId } = payload.payload as { messageId: string; reader: string };
+      const parsed = safeParse(ReadSchema, payload.payload);
+      if (!parsed) return;
       setState(prev => ({
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, status: 'read' } : m),
+        messages: prev.messages.map(m => m.id === parsed.messageId ? { ...m, status: 'read' } : m),
       }));
     });
 
@@ -132,23 +168,26 @@ export function useChat() {
     });
 
     channel.on('broadcast', { event: 'freeze' }, (payload) => {
-      const { frozen, by } = payload.payload as { frozen: boolean; by: string };
-      setState(prev => ({ ...prev, frozen, frozenBy: frozen ? by : null }));
+      const parsed = safeParse(FreezeSchema, payload.payload);
+      if (!parsed) return;
+      setState(prev => ({ ...prev, frozen: parsed.frozen, frozenBy: parsed.frozen ? parsed.by : null }));
     });
 
     channel.on('broadcast', { event: 'edit' }, (payload) => {
-      const { messageId, newText } = payload.payload as { messageId: string; newText: string };
+      const parsed = safeParse(EditSchema, payload.payload);
+      if (!parsed) return;
       setState(prev => ({
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: newText, edited: true } : m),
+        messages: prev.messages.map(m => m.id === parsed.messageId ? { ...m, text: parsed.newText, edited: true } : m),
       }));
     });
 
     channel.on('broadcast', { event: 'unsend' }, (payload) => {
-      const { messageId } = payload.payload as { messageId: string };
+      const parsed = safeParse(UnsendSchema, payload.payload);
+      if (!parsed) return;
       setState(prev => ({
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', deleted: true } : m),
+        messages: prev.messages.map(m => m.id === parsed.messageId ? { ...m, text: '', deleted: true } : m),
       }));
     });
 
