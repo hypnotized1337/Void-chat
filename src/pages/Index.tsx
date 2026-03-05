@@ -33,7 +33,7 @@ const Index = () => {
     if (!isAdmin) {
       const available = await checkUsernameAvailable(username, roomCode);
       if (!available) {
-        return { error: 'Identity Conflict: This name is currently occupied in this room.' };
+        return { error: 'Username already active in this void. Please choose another identity.' };
       }
     }
     joinRoom(username, roomCode);
