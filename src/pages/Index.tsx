@@ -10,6 +10,7 @@ const Index = () => {
   const {
     state, joinRoom, leaveRoom, sendMessage, sendTyping,
     toggleNotifications, nukeRoom, freezeChat, sendAnnouncement, editMessage, unsendMessage, sendImage, sendGif,
+    checkUsernameAvailable,
   } = useChat();
   const [adminOpen, setAdminOpen] = useState(false);
   const [authOverlay, setAuthOverlay] = useState(false);
@@ -26,8 +27,21 @@ const Index = () => {
     sendMessage(text);
   };
 
+  const handleJoin = async (username: string, roomCode: string) => {
+    // Admin bypass: skip duplicate check
+    const isAdmin = sessionStorage.getItem('is_admin') === 'true';
+    if (!isAdmin) {
+      const available = await checkUsernameAvailable(username, roomCode);
+      if (!available) {
+        return { error: 'Username already active in this void. Please choose another identity.' };
+      }
+    }
+    joinRoom(username, roomCode);
+    return { error: null };
+  };
+
   if (!state.isJoined) {
-    return <JoinScreen onJoin={joinRoom} />;
+    return <JoinScreen onJoin={handleJoin} />;
   }
 
   return (
