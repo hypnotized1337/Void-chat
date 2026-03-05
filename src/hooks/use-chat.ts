@@ -71,9 +71,10 @@ export function useChat() {
     };
   }, []);
 
-  // Window focus listener: mark all unread messages as read
+  // Visibility API listener: mark all unread messages as read when tab becomes visible
   useEffect(() => {
-    const handleFocus = () => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
       if (!channelRef.current) return;
       setState(prev => {
         const unreadIds = prev.messages
@@ -82,7 +83,6 @@ export function useChat() {
 
         if (unreadIds.length === 0) return prev;
 
-        // Broadcast bulk read
         channelRef.current?.send({
           type: 'broadcast',
           event: 'bulk-read',
@@ -98,8 +98,13 @@ export function useChat() {
       });
     };
 
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+    // Also handle window focus as a fallback
+    window.addEventListener('focus', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
   }, []);
 
   /**
@@ -108,25 +113,37 @@ export function useChat() {
    */
   const checkUsernameAvailable = useCallback(async (username: string, roomCode: string): Promise<boolean> => {
     return new Promise((resolve) => {
-      const peekChannel = supabase.channel(`room:${roomCode}:peek-${generateId()}`, {
-        config: { presence: { key: `_peek_${generateId()}` } },
+      const peekId = generateId();
+      const peekChannel = supabase.channel(`room:${roomCode}`, {
+        config: { presence: { key: `_peek_${peekId}` } },
       });
 
+      let resolved = false;
+      const finish = (result: boolean) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeout);
+        // Untrack before removing so we don't pollute presence
+        peekChannel.untrack().then(() => supabase.removeChannel(peekChannel)).catch(() => supabase.removeChannel(peekChannel));
+      };
+
       const timeout = setTimeout(() => {
-        supabase.removeChannel(peekChannel);
-        resolve(true); // On timeout, allow join (fail-open)
-      }, 4000);
+        if (!resolved) { resolved = true; supabase.removeChannel(peekChannel); resolve(true); }
+      }, 5000);
 
       peekChannel.on('presence', { event: 'sync' }, () => {
         const presenceState = peekChannel.presenceState();
-        const activeUsernames = Object.keys(presenceState);
+        const activeUsernames = Object.keys(presenceState).filter(k => !k.startsWith('_peek_'));
         const taken = activeUsernames.includes(username);
-        clearTimeout(timeout);
-        supabase.removeChannel(peekChannel);
+        finish(!taken);
         resolve(!taken);
       });
 
-      peekChannel.subscribe();
+      peekChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await peekChannel.track({ peekOnly: true, joinedAt: Date.now() });
+        }
+      });
     });
   }, []);
 
