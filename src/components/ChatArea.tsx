@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bell, BellOff, LogOut, Plus } from 'lucide-react';
+import { Send, Bell, BellOff, LogOut, Plus, Check, CheckCheck } from 'lucide-react';
 import { GifPicker } from '@/components/GifPicker';
 import { ChatMessage } from '@/types/chat';
 import { Progress } from '@/components/ui/progress';
@@ -33,6 +33,19 @@ const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 function isImageExpired(expiry?: number) {
   if (!expiry) return false;
   return Date.now() > expiry;
+}
+
+function StatusIcon({ status }: { status?: string }) {
+  if (status === 'read') {
+    return <CheckCheck className="w-3 h-3 text-primary inline-block" />;
+  }
+  if (status === 'delivered') {
+    return <CheckCheck className="w-3 h-3 text-muted-foreground inline-block" />;
+  }
+  if (status === 'sent') {
+    return <Check className="w-3 h-3 text-muted-foreground inline-block" />;
+  }
+  return null;
 }
 
 export function ChatArea({
@@ -123,12 +136,6 @@ export function ChatArea({
   const formatTime = (ts: number) =>
     new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const statusLabel = (s?: string) => {
-    if (s === 'read') return 'Read';
-    if (s === 'delivered') return 'Delivered';
-    return '';
-  };
-
   const isInputDisabled = frozen && frozenBy !== currentUser;
 
   return (
@@ -139,14 +146,12 @@ export function ChatArea({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {/* Drag overlay */}
       {dragging && (
         <div className="absolute inset-0 z-40 bg-background/90 flex items-center justify-center pointer-events-none">
           <span className="text-foreground text-sm font-medium">Drop image to share</span>
         </div>
       )}
 
-      {/* Header */}
       <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card">
         <span className="text-sm font-medium text-foreground">{roomCode}</span>
         <div className="flex items-center gap-1">
@@ -162,21 +167,18 @@ export function ChatArea({
         </div>
       </header>
 
-      {/* Frozen banner */}
       {frozen && (
         <div className="px-4 py-1.5 bg-secondary text-center">
           <span className="text-[11px] text-muted-foreground">Chat frozen{frozenBy ? ` by ${frozenBy}` : ''}</span>
         </div>
       )}
 
-      {/* Upload progress */}
       {uploading && (
         <div className="px-4 py-2">
           <Progress value={uploadProgress} className="h-1" />
         </div>
       )}
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-2">
         {messages.map((msg) => {
           if (msg.type === 'system') {
@@ -247,7 +249,7 @@ export function ChatArea({
                 <span className="text-[10px] text-muted-foreground">{formatTime(msg.timestamp)}</span>
                 {msg.edited && <span className="text-[10px] text-muted-foreground">· edited</span>}
                 {isOwn && msg.status && (
-                  <span className="text-[10px] text-muted-foreground">· {statusLabel(msg.status)}</span>
+                  <StatusIcon status={msg.status} />
                 )}
               </div>
             </div>
@@ -278,7 +280,6 @@ export function ChatArea({
         <div ref={endRef} />
       </div>
 
-      {/* Typing indicator */}
       {typingUsers.length > 0 && (
         <div className="px-4 pb-1 flex items-center gap-2">
           <div className="bg-message-other rounded-2xl rounded-bl-sm px-3 py-2 flex items-center gap-1">
@@ -292,7 +293,6 @@ export function ChatArea({
         </div>
       )}
 
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -305,7 +305,6 @@ export function ChatArea({
         }}
       />
 
-      {/* Input */}
       <form onSubmit={handleSubmit} className="p-3 shrink-0">
         <div className="flex gap-1 items-center">
           <button

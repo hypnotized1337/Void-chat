@@ -7,7 +7,6 @@ import { z } from 'zod';
 const generateId = () => Math.random().toString(36).substring(2, 12);
 const TWELVE_HOURS = 12 * 60 * 60 * 1000;
 
-// Validation schemas for broadcast payloads
 const ChatMessageSchema = z.object({
   id: z.string().max(50),
   username: z.string().max(20),
@@ -23,6 +22,7 @@ const ChatMessageSchema = z.object({
 
 const TypingSchema = z.object({ username: z.string().max(20) });
 const ReadSchema = z.object({ messageId: z.string().max(50), reader: z.string().max(20) });
+const BulkReadSchema = z.object({ messageIds: z.array(z.string().max(50)), reader: z.string().max(20) });
 const FreezeSchema = z.object({ frozen: z.boolean(), by: z.string().max(20) });
 const EditSchema = z.object({ messageId: z.string().max(50), newText: z.string().max(5000) });
 const UnsendSchema = z.object({ messageId: z.string().max(50) });
@@ -71,6 +71,65 @@ export function useChat() {
     };
   }, []);
 
+  // Window focus listener: mark all unread messages as read
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!channelRef.current) return;
+      setState(prev => {
+        const unreadIds = prev.messages
+          .filter(m => m.type === 'message' && m.username !== usernameRef.current && m.status !== 'read')
+          .map(m => m.id);
+
+        if (unreadIds.length === 0) return prev;
+
+        // Broadcast bulk read
+        channelRef.current?.send({
+          type: 'broadcast',
+          event: 'bulk-read',
+          payload: { messageIds: unreadIds, reader: usernameRef.current },
+        });
+
+        return {
+          ...prev,
+          messages: prev.messages.map(m =>
+            unreadIds.includes(m.id) ? { ...m, status: 'read' as const } : m
+          ),
+        };
+      });
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  /**
+   * Check if a username is available in the room before joining.
+   * Temporarily subscribes to the channel's presence to peek at current users.
+   */
+  const checkUsernameAvailable = useCallback(async (username: string, roomCode: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const peekChannel = supabase.channel(`room:${roomCode}:peek-${generateId()}`, {
+        config: { presence: { key: `_peek_${generateId()}` } },
+      });
+
+      const timeout = setTimeout(() => {
+        supabase.removeChannel(peekChannel);
+        resolve(true); // On timeout, allow join (fail-open)
+      }, 4000);
+
+      peekChannel.on('presence', { event: 'sync' }, () => {
+        const presenceState = peekChannel.presenceState();
+        const activeUsernames = Object.keys(presenceState);
+        const taken = activeUsernames.includes(username);
+        clearTimeout(timeout);
+        supabase.removeChannel(peekChannel);
+        resolve(!taken);
+      });
+
+      peekChannel.subscribe();
+    });
+  }, []);
+
   const joinRoom = useCallback((username: string, roomCode: string) => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
@@ -104,9 +163,15 @@ export function useChat() {
       const msg = safeParse(ChatMessageSchema, payload.payload);
       if (!msg) return;
       if (msg.username === usernameRef.current) return;
-      setState(prev => ({ ...prev, messages: [...prev.messages, { ...msg, status: 'delivered' } as ChatMessage] }));
 
-      if (!document.hidden && channelRef.current) {
+      const isFocused = document.hasFocus();
+      setState(prev => ({
+        ...prev,
+        messages: [...prev.messages, { ...msg, status: isFocused ? 'read' : 'delivered' } as ChatMessage],
+      }));
+
+      // If tab is focused, immediately send read receipt
+      if (isFocused && channelRef.current) {
         channelRef.current.send({ type: 'broadcast', event: 'read', payload: { messageId: msg.id, reader: usernameRef.current } });
       }
 
@@ -151,6 +216,17 @@ export function useChat() {
       setState(prev => ({
         ...prev,
         messages: prev.messages.map(m => m.id === parsed.messageId ? { ...m, status: 'read' } : m),
+      }));
+    });
+
+    channel.on('broadcast', { event: 'bulk-read' }, (payload) => {
+      const parsed = safeParse(BulkReadSchema, payload.payload);
+      if (!parsed) return;
+      setState(prev => ({
+        ...prev,
+        messages: prev.messages.map(m =>
+          parsed.messageIds.includes(m.id) ? { ...m, status: 'read' } : m
+        ),
       }));
     });
 
@@ -410,5 +486,6 @@ export function useChat() {
   return {
     state, joinRoom, leaveRoom, sendMessage, sendTyping, sendGif,
     toggleNotifications, nukeRoom, freezeChat, sendAnnouncement, editMessage, unsendMessage, sendImage,
+    checkUsernameAvailable,
   };
 }
