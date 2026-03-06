@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get('GIPHY_API_KEY');
+    const apiKey = Deno.env.get('KLIPY_API_KEY');
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'Not configured' }), {
         status: 500,
@@ -31,10 +31,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const searchLimit = Math.min(Math.max(limit || 20, 8), 50);
-    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(q)}&limit=${searchLimit}&rating=pg`;
+    const searchLimit = Math.min(Math.max(limit || 24, 8), 50);
+    const url = `https://api.klipy.co/v1/gifs/search?q=${encodeURIComponent(q)}&limit=${searchLimit}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: { 'X-API-KEY': apiKey },
+    });
     const data = await response.json();
 
     if (!data.data || !Array.isArray(data.data)) {
@@ -45,10 +47,10 @@ Deno.serve(async (req) => {
 
     const results = data.data.map((item: any) => ({
       id: item.id,
-      url: item.images?.original?.url || item.images?.fixed_height?.url || '',
-      preview_url: item.images?.fixed_width_small?.url || item.images?.fixed_height_small?.url || '',
-      width: item.images?.fixed_height_small?.width || 200,
-      height: item.images?.fixed_height_small?.height || 200,
+      url: item.images?.original?.url || item.images?.fixed_height?.url || item.url || '',
+      preview_url: item.images?.fixed_width_small?.url || item.images?.preview_gif?.url || item.images?.fixed_height_small?.url || item.url || '',
+      width: parseInt(item.images?.fixed_height_small?.width || '200', 10),
+      height: parseInt(item.images?.fixed_height_small?.height || '200', 10),
     })).filter((r: any) => r.url);
 
     return new Response(JSON.stringify({ results }), {
