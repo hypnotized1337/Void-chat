@@ -91,7 +91,7 @@ export function GifPicker({ onSelect, disabled }: GifPickerProps) {
             onChange={e => handleQueryChange(e.target.value)}
             placeholder="Search GIFs via KLIPY"
             autoFocus
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none"
             maxLength={100}
           />
           {query && (
