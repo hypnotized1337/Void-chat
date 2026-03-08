@@ -79,28 +79,30 @@ function safeParse<T>(schema: z.ZodSchema<T>, data: unknown): T | null {
   return result.data;
 }
 
+const DEFAULT_ROOM_STATE: Omit<ChatState, 'notificationsEnabled'> = {
+  username: '',
+  roomCode: '',
+  messages: [],
+  users: [],
+  isJoined: false,
+  typingUsers: [],
+  frozen: false,
+  frozenBy: null,
+  isPasswordProtected: false,
+};
+
 export function useChat() {
   const [state, setState] = useState<ChatState>(() => {
     const savedNotif = typeof window !== 'undefined'
       ? localStorage.getItem('chat_notif_pref') === 'true'
       : false;
-    return {
-      username: '',
-      roomCode: '',
-      messages: [],
-      users: [],
-      isJoined: false,
-      notificationsEnabled: savedNotif,
-      typingUsers: [],
-      frozen: false,
-      frozenBy: null,
-      isPasswordProtected: false,
-    };
+    return { ...DEFAULT_ROOM_STATE, notificationsEnabled: savedNotif };
   });
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const notificationsRef = useRef(state.notificationsEnabled);
   const usernameRef = useRef(state.username);
+  const roomCodeRef = useRef(state.roomCode);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const remoteTypingTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const sendTimestamps = useRef<number[]>([]);
@@ -109,6 +111,7 @@ export function useChat() {
 
   useEffect(() => { notificationsRef.current = state.notificationsEnabled; }, [state.notificationsEnabled]);
   useEffect(() => { usernameRef.current = state.username; }, [state.username]);
+  useEffect(() => { roomCodeRef.current = state.roomCode; }, [state.roomCode]);
 
   useEffect(() => {
     return () => {
@@ -252,11 +255,11 @@ export function useChat() {
             } else {
               body = `${msg.username} sent a message`;
             }
-            new Notification(state.roomCode, { body, icon: '/favicon.ico' });
+            new Notification(roomCodeRef.current, { body, icon: '/favicon.ico' });
 
             notifCooldownRef.current = window.setTimeout(() => {
               if (pendingNotifCount.current > 0) {
-                new Notification(state.roomCode, {
+                new Notification(roomCodeRef.current, {
                   body: `+ ${pendingNotifCount.current} more message${pendingNotifCount.current > 1 ? 's' : ''}`,
                   icon: '/favicon.ico',
                 });
@@ -268,17 +271,14 @@ export function useChat() {
         }
       });
 
-      channel.on('broadcast', { event: 'system' }, (payload) => {
+      const handleSystemOrAnnouncement = (payload: any) => {
         const msg = safeParse(ChatMessageSchema, payload.payload);
         if (!msg) return;
         setState(prev => ({ ...prev, messages: [...prev.messages, msg as ChatMessage] }));
-      });
+      };
 
-      channel.on('broadcast', { event: 'announcement' }, (payload) => {
-        const msg = safeParse(ChatMessageSchema, payload.payload);
-        if (!msg) return;
-        setState(prev => ({ ...prev, messages: [...prev.messages, msg as ChatMessage] }));
-      });
+      channel.on('broadcast', { event: 'system' }, handleSystemOrAnnouncement);
+      channel.on('broadcast', { event: 'announcement' }, handleSystemOrAnnouncement);
 
       channel.on('broadcast', { event: 'typing' }, (payload) => {
         const parsed = safeParse(TypingSchema, payload.payload);
@@ -380,18 +380,7 @@ export function useChat() {
               }
             });
           }
-          setState(prev => ({
-            ...prev,
-            isJoined: false,
-            messages: [],
-            users: [],
-            username: '',
-            roomCode: '',
-            typingUsers: [],
-            frozen: false,
-            frozenBy: null,
-            isPasswordProtected: false,
-          }));
+          setState(prev => ({ ...prev, ...DEFAULT_ROOM_STATE }));
           setTimeout(() => {
             toast.error('YOU HAVE BEEN REMOVED', {
               description: 'An admin removed you from the void.',
@@ -473,18 +462,7 @@ export function useChat() {
             // Leave the channel
             channel.untrack().then(() => supabase.removeChannel(channel)).catch(() => supabase.removeChannel(channel));
             channelRef.current = null;
-            setState(prev => ({
-              ...prev,
-              isJoined: false,
-              messages: [],
-              users: [],
-              username: '',
-              roomCode: '',
-              typingUsers: [],
-              frozen: false,
-              frozenBy: null,
-              isPasswordProtected: false,
-            }));
+            setState(prev => ({ ...prev, ...DEFAULT_ROOM_STATE }));
             setTimeout(() => {
               toast.error('IDENTITY CONFLICT', {
                 description: `"${username}" is already active in this void. Choose another identity.`,
@@ -536,18 +514,7 @@ export function useChat() {
       channelRef.current = null;
     }
 
-    setState(prev => ({
-      ...prev,
-      isJoined: false,
-      messages: [],
-      users: [],
-      username: '',
-      roomCode: '',
-      typingUsers: [],
-      frozen: false,
-      frozenBy: null,
-      isPasswordProtected: false,
-    }));
+    setState(prev => ({ ...prev, ...DEFAULT_ROOM_STATE }));
   }, []);
 
   const sendMessage = useCallback((text: string, replyTo?: ReplyTo) => {
