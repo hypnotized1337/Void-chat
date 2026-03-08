@@ -78,7 +78,7 @@ export function ChatArea({
   const endRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounter = useRef(0);
-  const lastMessageCountRef = useRef(messages.length);
+  const lastMessageIdRef = useRef<string | null>(null);
   const userScrolledRef = useRef(false);
 
   const checkIfScrolledUp = useCallback(() => {
