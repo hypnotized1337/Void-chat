@@ -92,6 +92,20 @@ export function useChat() {
     };
   }, []);
 
+  // Auto-delete expired messages (older than 10 minutes)
+  useEffect(() => {
+    if (!state.isJoined) return;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setState(prev => {
+        const filtered = prev.messages.filter(m => now - m.timestamp < TEN_MINUTES);
+        if (filtered.length === prev.messages.length) return prev;
+        return { ...prev, messages: filtered };
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [state.isJoined]);
+
   // Rate limiter check
   const checkRateLimit = useCallback((): boolean => {
     const now = Date.now();
