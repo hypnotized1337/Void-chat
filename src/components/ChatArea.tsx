@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bell, BellOff, LogOut, Plus, ChevronDown, ZoomIn } from 'lucide-react';
+import { Send, Bell, BellOff, LogOut, Plus, ChevronDown, ZoomIn, Users } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GifPicker } from '@/components/GifPicker';
 import { FullscreenImageViewer } from '@/components/FullscreenImageViewer';
-import { ChatMessage, ReplyTo } from '@/types/chat';
+import { ChatMessage, ReplyTo, RoomUser } from '@/types/chat';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { FileInspector, InspectedFile } from '@/components/chat/FileInspector';
 import { ReplyPreview } from '@/components/chat/ReplyPreview';
 import { ACCEPTED_FILE_TYPES } from '@/components/chat/FileHelpers';
+import { ChatSidebar } from '@/components/ChatSidebar';
 
 interface ChatAreaProps {
   messages: ChatMessage[];
   currentUser: string;
   roomCode: string;
+  users: RoomUser[];
   notificationsEnabled: boolean;
   typingUsers: string[];
   frozen: boolean;
@@ -37,6 +40,7 @@ export function ChatArea({
   messages,
   currentUser,
   roomCode,
+  users,
   notificationsEnabled,
   typingUsers,
   frozen,
@@ -64,9 +68,11 @@ export function ChatArea({
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMarkerId, setUnreadMarkerId] = useState<string | null>(null);
   const [notificationJiggle, setNotificationJiggle] = useState(false);
   const [inspectedFile, setInspectedFile] = useState<InspectedFile | null>(null);
   const [replyingTo, setReplyingTo] = useState<ReplyTo | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -86,6 +92,7 @@ export function ChatArea({
     setIsScrolledUp(scrolledUp);
     if (!scrolledUp) {
       setUnreadCount(0);
+      setUnreadMarkerId(null);
       userScrolledRef.current = false;
     } else {
       userScrolledRef.current = true;
@@ -95,6 +102,7 @@ export function ChatArea({
   const scrollToBottom = useCallback((smooth = true) => {
     endRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
     setUnreadCount(0);
+    setUnreadMarkerId(null);
     setIsScrolledUp(false);
     userScrolledRef.current = false;
   }, []);
@@ -119,13 +127,17 @@ export function ChatArea({
     const newCount = messages.length;
     if (newCount > lastMessageCountRef.current) {
       if (checkIfScrolledUp() && userScrolledRef.current) {
+        const newMsgs = messages.slice(lastMessageCountRef.current);
+        if (newMsgs.length > 0 && !unreadMarkerId) {
+          setUnreadMarkerId(newMsgs[0].id);
+        }
         setUnreadCount(prev => prev + (newCount - lastMessageCountRef.current));
       } else {
         scrollToBottom(false);
       }
     }
     lastMessageCountRef.current = newCount;
-  }, [messages, checkIfScrolledUp, scrollToBottom]);
+  }, [messages, checkIfScrolledUp, scrollToBottom, unreadMarkerId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,7 +213,13 @@ export function ChatArea({
       )}
 
       {/* Header */}
-      <header className="h-12 flex items-center justify-end px-4 shrink-0 bg-card/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-20">
+      <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-20">
+        <button
+          onClick={() => setMobileSidebarOpen(true)}
+          className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors md:hidden"
+        >
+          <Users className="w-4 h-4" />
+        </button>
         <div className="flex items-center gap-1">
           <Popover>
             <PopoverTrigger asChild>
@@ -272,25 +290,33 @@ export function ChatArea({
             const isLastInGroup = !isGroupable || !next || next.type !== 'message' || next.deleted || next.username !== msg.username;
 
             return (
-              <MessageBubble
-                key={msg.id}
-                msg={msg}
-                isOwn={msg.username === currentUser}
-                index={i}
-                groupInfo={{ isFirstInGroup, isLastInGroup }}
-                onImageClick={setFullscreenImage}
-                onInspectFile={setInspectedFile}
-                onEdit={handleStartEdit}
-                onUnsend={onUnsend}
-                onReply={setReplyingTo}
-                onReact={onReact}
-                onScrollToMessage={scrollToMessage}
-                editingId={editingId}
-                editText={editText}
-                onEditTextChange={setEditText}
-                onEditSubmit={handleEditSubmit}
-                onEditCancel={handleEditCancel}
-              />
+              <div key={msg.id}>
+                {unreadMarkerId === msg.id && (
+                  <div className="flex items-center gap-3 my-2 px-2">
+                    <div className="flex-1 h-px bg-destructive/40" />
+                    <span className="text-[10px] font-mono text-destructive/60 shrink-0">new messages</span>
+                    <div className="flex-1 h-px bg-destructive/40" />
+                  </div>
+                )}
+                <MessageBubble
+                  msg={msg}
+                  isOwn={msg.username === currentUser}
+                  index={i}
+                  groupInfo={{ isFirstInGroup, isLastInGroup }}
+                  onImageClick={setFullscreenImage}
+                  onInspectFile={setInspectedFile}
+                  onEdit={handleStartEdit}
+                  onUnsend={onUnsend}
+                  onReply={setReplyingTo}
+                  onReact={onReact}
+                  onScrollToMessage={scrollToMessage}
+                  editingId={editingId}
+                  editText={editText}
+                  onEditTextChange={setEditText}
+                  onEditSubmit={handleEditSubmit}
+                  onEditCancel={handleEditCancel}
+                />
+              </div>
             );
           })}
         </AnimatePresence>
@@ -350,7 +376,7 @@ export function ChatArea({
 
       {/* Scroll to bottom */}
       <AnimatePresence>
-        {isScrolledUp && unreadCount > 0 && (
+        {isScrolledUp && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -466,6 +492,19 @@ export function ChatArea({
           />
         )}
       </AnimatePresence>
+
+      {/* Mobile sidebar sheet */}
+      <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-56">
+          <SheetTitle className="sr-only">Users</SheetTitle>
+          <ChatSidebar
+            roomCode={roomCode}
+            users={users}
+            currentUser={currentUser}
+            onLeave={() => { setMobileSidebarOpen(false); onLeave(); }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

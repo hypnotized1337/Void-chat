@@ -79,6 +79,7 @@ const Index = () => {
         messages={state.messages}
         currentUser={state.username}
         roomCode={state.roomCode}
+        users={state.users}
         notificationsEnabled={state.notificationsEnabled}
         typingUsers={state.typingUsers}
         frozen={state.frozen}

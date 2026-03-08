@@ -7,6 +7,13 @@ import {
   ContextMenuContent,
   ContextMenuItem,
 } from '@/components/ui/context-menu';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
+import { toast } from 'sonner';
 import { StatusIcon } from './StatusIcon';
 import { ImageAttachment } from './ImageAttachment';
 import { FileAttachment } from './FileAttachment';
@@ -182,7 +189,8 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       ) : (
         <div
-          className={`px-3 py-2 text-sm leading-relaxed transition-[filter] duration-150 hover:brightness-110 w-fit max-w-full ${radiusClass} ${
+          onDoubleClick={() => onReact(msg.id, '⚡')}
+          className={`px-3 py-2 text-sm leading-relaxed transition-[filter] duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
             isOwn
               ? 'bg-message-own text-message-own-foreground'
               : 'bg-message-other text-message-other-foreground'
@@ -255,6 +263,11 @@ export const MessageBubble = memo(function MessageBubble({
       <ContextMenuItem onSelect={() => onReply({ id: msg.id, username: msg.username, text: msg.text.slice(0, 100) })}>
         Reply
       </ContextMenuItem>
+      {msg.text && (
+        <ContextMenuItem onSelect={() => { navigator.clipboard.writeText(msg.text); toast('Copied to clipboard', { duration: 1500 }); }}>
+          Copy
+        </ContextMenuItem>
+      )}
       <ContextMenuItem onSelect={() => setShowReactionPicker(prev => !prev)}>
         React
       </ContextMenuItem>
@@ -270,12 +283,23 @@ export const MessageBubble = memo(function MessageBubble({
       custom={index}
       className={groupInfo.isFirstInGroup ? 'mt-2' : 'mt-0.5'}
     >
-      <ContextMenu>
-        <ContextMenuTrigger asChild>
-          <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>{bubble}</div>
-        </ContextMenuTrigger>
-        {contextMenuItems}
-      </ContextMenu>
+      <TooltipProvider delayDuration={400}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <ContextMenu>
+                <ContextMenuTrigger asChild>
+                  <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>{bubble}</div>
+                </ContextMenuTrigger>
+                {contextMenuItems}
+              </ContextMenu>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side={isOwn ? 'left' : 'right'} className="text-[10px] font-mono px-2 py-1">
+            {formatTime(msg.timestamp)}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </motion.div>
   );
 });
