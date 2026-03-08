@@ -67,7 +67,6 @@ export function ChatArea({
   const [notificationJiggle, setNotificationJiggle] = useState(false);
   const [inspectedFile, setInspectedFile] = useState<InspectedFile | null>(null);
   const [replyingTo, setReplyingTo] = useState<ReplyTo | null>(null);
-  const [currentTime, setCurrentTime] = useState(Date.now());
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -75,12 +74,6 @@ export function ChatArea({
   const dragCounter = useRef(0);
   const lastMessageCountRef = useRef(messages.length);
   const userScrolledRef = useRef(false);
-
-  // Shared 1-second ticker for self-destruct timers
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const checkIfScrolledUp = useCallback(() => {
     if (!scrollContainerRef.current) return false;
