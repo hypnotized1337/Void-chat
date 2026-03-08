@@ -85,6 +85,7 @@ const Index = () => {
         frozen={state.frozen}
         frozenBy={state.frozenBy}
         nuking={nuking}
+        isPasswordProtected={state.isPasswordProtected}
         uiScale={uiScale}
         onScaleChange={handleScaleChange}
         onSend={handleSend}

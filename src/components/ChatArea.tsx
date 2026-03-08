@@ -246,6 +246,12 @@ export function ChatArea({
         >
           <Users className="w-4 h-4" />
         </button>
+        {isPasswordProtected && (
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Lock className="w-3 h-3" />
+            <span className="text-[10px] font-mono">locked</span>
+          </div>
+        )}
         <div className="flex-1" />
         <div className="flex items-center gap-1">
           <Popover>
