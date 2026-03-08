@@ -16,6 +16,7 @@ interface ChatAreaProps {
   typingUsers: string[];
   frozen: boolean;
   frozenBy: string | null;
+  nuking: boolean;
   onSend: (text: string) => void;
   onTyping: () => void;
   onToggleNotifications: () => void;
