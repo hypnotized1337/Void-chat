@@ -9,6 +9,7 @@ import { FullscreenImageViewer } from '@/components/FullscreenImageViewer';
 import { ChatMessage, ReplyTo, RoomUser } from '@/types/chat';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { FileInspector, InspectedFile } from '@/components/chat/FileInspector';
+import { VideoInspector, InspectedVideo } from '@/components/chat/VideoInspector';
 import { ReplyPreview } from '@/components/chat/ReplyPreview';
 import { ACCEPTED_FILE_TYPES } from '@/components/chat/FileHelpers';
 import { ChatSidebar } from '@/components/ChatSidebar';
@@ -74,6 +75,7 @@ export function ChatArea({
   const [unreadMarkerId, setUnreadMarkerId] = useState<string | null>(null);
   const [notificationJiggle, setNotificationJiggle] = useState(false);
   const [inspectedFile, setInspectedFile] = useState<InspectedFile | null>(null);
+  const [inspectedVideo, setInspectedVideo] = useState<InspectedVideo | null>(null);
   const [replyingTo, setReplyingTo] = useState<ReplyTo | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -328,6 +330,7 @@ export function ChatArea({
                   groupInfo={groupInfo}
                   onImageClick={setFullscreenImage}
                   onInspectFile={setInspectedFile}
+                  onInspectVideo={setInspectedVideo}
                   onEdit={handleStartEdit}
                   onUnsend={onUnsend}
                   onReply={setReplyingTo}
@@ -522,6 +525,16 @@ export function ChatArea({
           <FileInspector
             file={inspectedFile}
             onClose={() => setInspectedFile(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Video inspector */}
+      <AnimatePresence>
+        {inspectedVideo && (
+          <VideoInspector
+            video={inspectedVideo}
+            onClose={() => setInspectedVideo(null)}
           />
         )}
       </AnimatePresence>

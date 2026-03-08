@@ -412,6 +412,49 @@ export function useChat() {
         }));
       });
 
+      // History sync: respond to requests from rejoining users
+      channel.on('broadcast', { event: 'request-history' }, () => {
+        // Only the alphabetically first user responds to avoid duplicates
+        const presenceState = channel.presenceState();
+        const activeUsers = Object.keys(presenceState).sort();
+        if (activeUsers[0] !== username) return;
+
+        const now = Date.now();
+        setState(prev => {
+          const validMessages = prev.messages.filter(m => now - m.timestamp < TEN_MINUTES);
+          if (validMessages.length > 0) {
+            channel.send({
+              type: 'broadcast',
+              event: 'history-sync',
+              payload: { messages: validMessages },
+            });
+          }
+          return prev;
+        });
+      });
+
+      // History sync: receive history when rejoining
+      channel.on('broadcast', { event: 'history-sync' }, (payload) => {
+        const parsed = payload.payload as { messages?: unknown[] };
+        if (!parsed?.messages || !Array.isArray(parsed.messages)) return;
+        const now = Date.now();
+        const validMessages: ChatMessage[] = [];
+        for (const raw of parsed.messages) {
+          const msg = safeParse(ChatMessageSchema, raw);
+          if (msg && now - msg.timestamp < TEN_MINUTES) {
+            validMessages.push(msg as ChatMessage);
+          }
+        }
+        if (validMessages.length === 0) return;
+        setState(prev => {
+          const existingIds = new Set(prev.messages.map(m => m.id));
+          const newMessages = validMessages.filter(m => !existingIds.has(m.id));
+          if (newMessages.length === 0) return prev;
+          const merged = [...newMessages, ...prev.messages].sort((a, b) => a.timestamp - b.timestamp);
+          return { ...prev, messages: merged };
+        });
+      });
+
       let hasHadUsers = false;
 
       channel.on('presence', { event: 'sync' }, () => {
@@ -482,6 +525,10 @@ export function useChat() {
           // Resolve after a delay to allow presence sync with duplicate info
           if (skipDuplicateCheck) {
             channel.send({ type: 'broadcast', event: 'system', payload: systemMsg });
+            // Request history from existing users after a short delay
+            setTimeout(() => {
+              channel.send({ type: 'broadcast', event: 'request-history', payload: {} });
+            }, 500);
             resolveJoin({ error: null });
           } else {
             setTimeout(() => {
@@ -489,6 +536,10 @@ export function useChat() {
                 duplicateChecked = true;
                 // Only broadcast join after confirming no duplicate
                 channel.send({ type: 'broadcast', event: 'system', payload: systemMsg });
+                // Request history from existing users
+                setTimeout(() => {
+                  channel.send({ type: 'broadcast', event: 'request-history', payload: {} });
+                }, 500);
                 resolveJoin({ error: null });
               }
             }, 1500);

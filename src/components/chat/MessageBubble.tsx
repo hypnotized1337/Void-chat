@@ -13,7 +13,9 @@ import { toast } from 'sonner';
 import { StatusIcon } from './StatusIcon';
 import { ImageAttachment } from './ImageAttachment';
 import { FileAttachment } from './FileAttachment';
-import { isImageOrGif, isImageExpired } from './FileHelpers';
+import { VideoAttachment } from './VideoAttachment';
+import { isImageOrGif, isImageExpired, isVideo } from './FileHelpers';
+import type { InspectedVideo } from './VideoInspector';
 import { SelfDestructTimer } from './SelfDestructTimer';
 import { ReactionPicker } from './ReactionPicker';
 import type { InspectedFile } from './FileInspector';
@@ -32,6 +34,7 @@ interface MessageBubbleProps {
   groupInfo: MessageGroupInfo;
   onImageClick: (url: string) => void;
   onInspectFile: (file: InspectedFile) => void;
+  onInspectVideo: (video: InspectedVideo) => void;
   onEdit: (id: string, text: string) => void;
   onUnsend: (id: string) => void;
   onReply: (replyTo: ReplyTo) => void;
@@ -112,6 +115,7 @@ export const MessageBubble = memo(function MessageBubble({
   groupInfo,
   onImageClick,
   onInspectFile,
+  onInspectVideo,
   onEdit,
   onUnsend,
   onReply,
@@ -175,6 +179,7 @@ export const MessageBubble = memo(function MessageBubble({
 
   const imageExpired = isImageExpired(msg.imageExpiry);
   const hasFile = !!(msg.fileUrl && msg.fileName);
+  const isFileVideo = msg.fileUrl ? isVideo(msg.fileUrl, msg.fileMimeType) : false;
   const isFileImageOrGif = msg.fileUrl ? isImageOrGif(msg.fileUrl, msg.fileMimeType) : true;
   const reactions = msg.reactions || {};
   const hasReactions = Object.keys(reactions).length > 0;
@@ -232,7 +237,15 @@ export const MessageBubble = memo(function MessageBubble({
               onImageClick={onImageClick}
             />
           )}
-          {hasFile && !isFileImageOrGif && (
+          {hasFile && isFileVideo && (
+            <VideoAttachment
+              fileUrl={msg.fileUrl!}
+              fileName={msg.fileName!}
+              isOwn={isOwn}
+              onOpen={() => onInspectVideo({ name: msg.fileName!, size: msg.fileSize, url: msg.fileUrl!, mimeType: msg.fileMimeType, timestamp: msg.timestamp })}
+            />
+          )}
+          {hasFile && !isFileImageOrGif && !isFileVideo && (
             <FileAttachment
               fileName={msg.fileName!}
               fileSize={msg.fileSize}
