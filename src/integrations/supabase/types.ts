@@ -107,6 +107,30 @@ export type Database = {
         }
         Relationships: []
       }
+      room_passwords: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          password_hash: string
+          room_code: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          password_hash: string
+          room_code: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          password_hash?: string
+          room_code?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
