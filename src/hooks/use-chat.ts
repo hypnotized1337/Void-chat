@@ -462,18 +462,7 @@ export function useChat() {
             // Leave the channel
             channel.untrack().then(() => supabase.removeChannel(channel)).catch(() => supabase.removeChannel(channel));
             channelRef.current = null;
-            setState(prev => ({
-              ...prev,
-              isJoined: false,
-              messages: [],
-              users: [],
-              username: '',
-              roomCode: '',
-              typingUsers: [],
-              frozen: false,
-              frozenBy: null,
-              isPasswordProtected: false,
-            }));
+            setState(prev => ({ ...prev, ...DEFAULT_ROOM_STATE }));
             setTimeout(() => {
               toast.error('IDENTITY CONFLICT', {
                 description: `"${username}" is already active in this void. Choose another identity.`,
