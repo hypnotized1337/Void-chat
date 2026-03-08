@@ -280,7 +280,6 @@ export function ChatArea({
                 msg={msg}
                 isOwn={msg.username === currentUser}
                 index={i}
-                currentTime={currentTime}
                 groupInfo={{ isFirstInGroup, isLastInGroup }}
                 onImageClick={setFullscreenImage}
                 onInspectFile={setInspectedFile}

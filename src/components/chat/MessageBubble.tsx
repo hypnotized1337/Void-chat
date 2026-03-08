@@ -25,7 +25,6 @@ interface MessageBubbleProps {
   msg: ChatMessage;
   isOwn: boolean;
   index: number;
-  currentTime: number;
   groupInfo: MessageGroupInfo;
   onImageClick: (url: string) => void;
   onInspectFile: (file: InspectedFile) => void;
@@ -62,17 +61,15 @@ function getBubbleRadius(isOwn: boolean, groupInfo: MessageGroupInfo) {
   const { isFirstInGroup, isLastInGroup } = groupInfo;
   
   if (isOwn) {
-    // Own messages: tail on bottom-right
     if (isFirstInGroup && isLastInGroup) return 'rounded-2xl rounded-br-sm';
     if (isFirstInGroup) return 'rounded-2xl rounded-br-md';
     if (isLastInGroup) return 'rounded-2xl rounded-tr-md rounded-br-sm';
-    return 'rounded-2xl rounded-tr-md rounded-br-md'; // middle
+    return 'rounded-2xl rounded-tr-md rounded-br-md';
   } else {
-    // Other messages: tail on bottom-left
     if (isFirstInGroup && isLastInGroup) return 'rounded-2xl rounded-bl-sm';
     if (isFirstInGroup) return 'rounded-2xl rounded-bl-md';
     if (isLastInGroup) return 'rounded-2xl rounded-tl-md rounded-bl-sm';
-    return 'rounded-2xl rounded-tl-md rounded-bl-md'; // middle
+    return 'rounded-2xl rounded-tl-md rounded-bl-md';
   }
 }
 
@@ -80,7 +77,6 @@ export const MessageBubble = memo(function MessageBubble({
   msg,
   isOwn,
   index,
-  currentTime,
   groupInfo,
   onImageClick,
   onInspectFile,
@@ -97,7 +93,6 @@ export const MessageBubble = memo(function MessageBubble({
 }: MessageBubbleProps) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
 
-  // System messages
   if (msg.type === 'system') {
     return (
       <motion.div
@@ -113,7 +108,6 @@ export const MessageBubble = memo(function MessageBubble({
     );
   }
 
-  // Announcements
   if (msg.type === 'announcement') {
     return (
       <motion.div
@@ -129,7 +123,6 @@ export const MessageBubble = memo(function MessageBubble({
     );
   }
 
-  // Deleted messages
   if (msg.deleted) {
     return (
       <motion.div
@@ -164,7 +157,6 @@ export const MessageBubble = memo(function MessageBubble({
         <span className="text-[11px] text-muted-foreground ml-1">{msg.username}</span>
       )}
 
-      {/* Reply quote */}
       {msg.replyTo && (
         <div
           className="ml-1 mb-0.5 border-l-2 border-muted-foreground/30 pl-2 py-0.5 cursor-pointer"
@@ -217,7 +209,6 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       )}
 
-      {/* Reactions */}
       {hasReactions && (
         <div className="flex flex-wrap gap-1 ml-1 mt-0.5">
           {Object.entries(reactions).map(([emoji, users]) => (
@@ -238,17 +229,15 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       )}
 
-      {/* Only show meta on last message in group */}
       {groupInfo.isLastInGroup && (
         <div className={`flex items-center gap-1 ${isOwn ? 'justify-end mr-1' : 'ml-1'}`}>
           <span className="text-[10px] text-muted-foreground">{formatTime(msg.timestamp)}</span>
           {msg.edited && <span className="text-[10px] text-muted-foreground">· edited</span>}
           {isOwn && msg.status && <StatusIcon status={msg.status} />}
-          <SelfDestructTimer timestamp={msg.timestamp} currentTime={currentTime} />
+          <SelfDestructTimer timestamp={msg.timestamp} />
         </div>
       )}
 
-      {/* Inline reaction picker */}
       <AnimatePresence>
         {showReactionPicker && (
           <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
