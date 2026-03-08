@@ -47,6 +47,7 @@ interface FileInspectorProps {
 }
 
 function FileInspector({ fileName, fileSize, fileUrl, onClose }: FileInspectorProps) {
+  const IconComponent = getFileIcon(undefined, fileName);
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
