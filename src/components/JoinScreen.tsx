@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,30 @@ import { ChangelogDialog } from '@/components/ChangelogDialog';
 
 interface JoinScreenProps {
   onJoin: (username: string, roomCode: string) => Promise<{ error: string | null }>;
+}
+
+// Glitch text effect component
+function GlitchTitle() {
+  const [glitching, setGlitching] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGlitching(true);
+      setTimeout(() => setGlitching(false), 200);
+    }, 4000 + Math.random() * 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.h1
+      className="text-lg font-medium text-foreground tracking-tight font-mono relative select-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <span className={glitching ? 'glitch-text' : ''}>v0id</span>
+    </motion.h1>
+  );
 }
 
 export function JoinScreen({ onJoin }: JoinScreenProps) {
@@ -28,18 +52,26 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Grain texture overlay */}
+      <div className="grain-overlay" />
+      
       <ChangelogDialog />
       <motion.form
         onSubmit={handleJoin}
-        className="w-full max-w-sm space-y-5"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="w-full max-w-sm space-y-5 relative z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
       >
-        <div className="text-center mb-6">
-          <h1 className="text-lg font-medium text-foreground tracking-tight font-mono">v0id</h1>
-        </div>
+        <motion.div
+          className="text-center mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <GlitchTitle />
+        </motion.div>
 
         <AnimatePresence>
           {error && (
@@ -55,7 +87,13 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
           )}
         </AnimatePresence>
 
-        <div className="space-y-1.5">
+        {/* Username field - stagger delay 0.2s */}
+        <motion.div
+          className="space-y-1.5"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
           <label className="text-xs font-medium text-muted-foreground font-mono">Username</label>
           <input
             type="text"
@@ -67,9 +105,15 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
             required
             disabled={joining}
           />
-        </div>
+        </motion.div>
 
-        <div className="space-y-1.5">
+        {/* Room code field - stagger delay 0.4s */}
+        <motion.div
+          className="space-y-1.5"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+        >
           <label className="text-xs font-medium text-muted-foreground font-mono">Room Code</label>
           <div className="relative">
             <input
@@ -97,7 +141,6 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
                     type: 'spring',
                     stiffness: 500,
                     damping: 15,
-                    delay: 0,
                   }}
                 >
                   *
@@ -105,35 +148,52 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <motion.button
-          type="submit"
-          disabled={!username.trim() || !roomName.trim() || joining}
-          className="w-full bg-primary text-primary-foreground font-medium py-2.5 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-20 disabled:cursor-not-allowed font-mono"
-          whileTap={{ scale: 0.95 }}
+        {/* Join button - stagger delay 0.6s with breathing glow */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
         >
-          {joining ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              entering...
-            </>
-          ) : (
-            <>
-              join
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </motion.button>
+          <motion.button
+            type="submit"
+            disabled={!username.trim() || !roomName.trim() || joining}
+            className="w-full bg-primary text-primary-foreground font-medium py-2.5 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-20 disabled:cursor-not-allowed font-mono relative join-button-glow"
+            whileTap={{ scale: 0.95 }}
+          >
+            {joining ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                entering...
+              </>
+            ) : (
+              <>
+                join
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </motion.button>
+        </motion.div>
 
-        <p className="text-[9px] text-muted-foreground leading-relaxed font-mono text-center">
+        <motion.p
+          className="text-[9px] text-muted-foreground leading-relaxed font-mono text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.9 }}
+        >
           all messages self-destruct after 10 minutes. no logs. no history.
-        </p>
-        <div className="text-center">
+        </motion.p>
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 1.0 }}
+        >
           <Link to="/changelog" className="text-[9px] text-muted-foreground/50 hover:text-muted-foreground font-mono transition-colors">
             changelog
           </Link>
-        </div>
+        </motion.div>
       </motion.form>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bell, BellOff, LogOut, Plus, ChevronDown, ZoomIn } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
@@ -208,7 +208,7 @@ export function ChatArea({
       )}
 
       {/* Header */}
-      <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card">
+      <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-20">
         <span className="text-sm font-medium text-foreground font-mono cursor-default select-none">
           {currentUser}
         </span>
@@ -259,28 +259,51 @@ export function ChatArea({
 
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-2 relative">
+        {/* Empty state */}
+        {!nuking && messages.length === 0 && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <span className="text-sm font-mono text-muted-foreground/40 select-none">
+              say something into the void
+            </span>
+          </motion.div>
+        )}
+
         <AnimatePresence initial={false}>
-          {!nuking && messages.map((msg, i) => (
-            <MessageBubble
-              key={msg.id}
-              msg={msg}
-              isOwn={msg.username === currentUser}
-              index={i}
-              currentTime={currentTime}
-              onImageClick={setFullscreenImage}
-              onInspectFile={setInspectedFile}
-              onEdit={handleStartEdit}
-              onUnsend={onUnsend}
-              onReply={setReplyingTo}
-              onReact={onReact}
-              onScrollToMessage={scrollToMessage}
-              editingId={editingId}
-              editText={editText}
-              onEditTextChange={setEditText}
-              onEditSubmit={handleEditSubmit}
-              onEditCancel={handleEditCancel}
-            />
-          ))}
+          {!nuking && messages.map((msg, i) => {
+            const prev = messages[i - 1];
+            const next = messages[i + 1];
+            const isGroupable = msg.type === 'message' && !msg.deleted;
+            const isFirstInGroup = !isGroupable || !prev || prev.type !== 'message' || prev.deleted || prev.username !== msg.username;
+            const isLastInGroup = !isGroupable || !next || next.type !== 'message' || next.deleted || next.username !== msg.username;
+
+            return (
+              <MessageBubble
+                key={msg.id}
+                msg={msg}
+                isOwn={msg.username === currentUser}
+                index={i}
+                currentTime={currentTime}
+                groupInfo={{ isFirstInGroup, isLastInGroup }}
+                onImageClick={setFullscreenImage}
+                onInspectFile={setInspectedFile}
+                onEdit={handleStartEdit}
+                onUnsend={onUnsend}
+                onReply={setReplyingTo}
+                onReact={onReact}
+                onScrollToMessage={scrollToMessage}
+                editingId={editingId}
+                editText={editText}
+                onEditTextChange={setEditText}
+                onEditSubmit={handleEditSubmit}
+                onEditCancel={handleEditCancel}
+              />
+            );
+          })}
         </AnimatePresence>
 
         {/* Nuke dissolve overlay */}
@@ -402,7 +425,7 @@ export function ChatArea({
             />
           </div>
         )}
-        <div className="flex gap-1 items-center">
+        <div className="flex gap-1 items-center border border-border/60 rounded-xl bg-card/50 px-1">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -418,16 +441,22 @@ export function ChatArea({
             onChange={handleInputChange}
             placeholder={isInputDisabled ? 'Chat is frozen' : 'Message'}
             disabled={isInputDisabled}
-            className="flex-1 bg-input rounded-lg py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-sans"
+            className="flex-1 bg-transparent py-2.5 px-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-sans"
             maxLength={2000}
           />
-          <button
+          {input.length > 1800 && (
+            <span className="text-[10px] font-mono text-muted-foreground/60 pr-1">
+              {input.length}/2000
+            </span>
+          )}
+          <motion.button
             type="submit"
             disabled={!input.trim() || isInputDisabled}
-            className="bg-primary text-primary-foreground p-2.5 rounded-lg hover:opacity-90 transition-all active:scale-[0.95] disabled:opacity-20 disabled:cursor-not-allowed"
+            className="bg-primary text-primary-foreground p-2.5 rounded-lg hover:opacity-90 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+            whileTap={{ scale: 0.9, rotate: -12 }}
           >
             <Send className="w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </form>
 

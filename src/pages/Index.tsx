@@ -72,6 +72,7 @@ const Index = () => {
       <ChatSidebar
         roomCode={state.roomCode}
         users={state.users}
+        currentUser={state.username}
         onLeave={leaveRoom}
       />
       <ChatArea
