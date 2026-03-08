@@ -77,15 +77,18 @@ const formatTime = (ts: number) =>
   new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const messageVariants = {
-  hidden: { opacity: 0, y: 12, scale: 0.97 },
+  hidden: { opacity: 0, y: 16, scale: 0.96, filter: 'blur(2px)' },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     scale: 1,
+    filter: 'blur(0px)',
     transition: {
-      duration: 0.25,
-      delay: Math.min(i * 0.03, 0.3),
-      ease: 'easeOut' as const,
+      type: 'spring' as const,
+      stiffness: 380,
+      damping: 28,
+      mass: 0.8,
+      delay: Math.min(i * 0.02, 0.2),
     },
   }),
 };
@@ -253,7 +256,11 @@ export const MessageBubble = memo(function MessageBubble({
             <motion.button
               key={emoji}
               onClick={() => onReact(msg.id, emoji)}
-              whileTap={{ scale: 1.3 }}
+              whileTap={{ scale: 1.4, rotate: 8 }}
+              whileHover={{ scale: 1.1 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
               className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] border transition-colors ${
                 users.includes(currentUser)
                   ? 'border-foreground/30 bg-muted'

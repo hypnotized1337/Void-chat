@@ -224,15 +224,15 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
       <motion.form
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-5 relative z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div
           className="text-center mb-6"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
           <GlitchTitle />
         </motion.div>
@@ -452,7 +452,8 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
             type="submit"
             disabled={isSubmitDisabled}
             className="w-full bg-primary text-primary-foreground font-medium py-2.5 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-20 disabled:cursor-not-allowed font-mono relative join-button-glow"
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.97 }}
+            whileHover={!isSubmitDisabled ? { scale: 1.01 } : undefined}
           >
             {isLoading ? (
               <>

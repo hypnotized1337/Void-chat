@@ -304,7 +304,7 @@ export function ChatArea({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <span className="text-sm font-mono text-muted-foreground/40 select-none">
+            <span className="text-sm font-mono text-muted-foreground/40 select-none void-pulse">
               say something into the void
             </span>
           </motion.div>
@@ -315,9 +315,9 @@ export function ChatArea({
               <div key={msg.id}>
                 {unreadMarkerId === msg.id && (
                   <div className="flex items-center gap-3 my-2 px-2">
-                    <div className="flex-1 h-px bg-foreground/70" />
+                    <div className="flex-1 unread-marker-line" />
                     <span className="text-[10px] font-mono text-foreground font-semibold shrink-0">new messages</span>
-                    <div className="flex-1 h-px bg-foreground/70" />
+                    <div className="flex-1 unread-marker-line" />
                   </div>
                 )}
                 <MessageBubble
@@ -404,19 +404,26 @@ export function ChatArea({
       <AnimatePresence>
         {isScrolledUp && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            initial={{ opacity: 0, scale: 0.6, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 10 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            exit={{ opacity: 0, scale: 0.6, y: 20 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             onClick={() => scrollToBottom(true)}
-            className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 w-12 h-12 rounded-full bg-background border border-foreground flex items-center justify-center text-foreground hover:bg-foreground hover:text-background transition-colors active:scale-[0.95] shadow-lg"
+            className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 w-12 h-12 rounded-full bg-background border border-foreground flex items-center justify-center text-foreground hover:bg-foreground hover:text-background transition-colors active:scale-[0.95] shadow-lg backdrop-blur-sm"
             aria-label="Scroll to bottom"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
           >
             <ChevronDown className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-foreground text-background text-[10px] font-mono font-bold flex items-center justify-center border border-background">
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 600, damping: 15 }}
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-foreground text-background text-[10px] font-mono font-bold flex items-center justify-center border border-background"
+              >
                 {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
+              </motion.span>
             )}
           </motion.button>
         )}
