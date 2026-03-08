@@ -382,23 +382,9 @@ export function useChat() {
         if (!parsed) return;
         setState(prev => ({
           ...prev,
-          messages: prev.messages.map(m => {
-            if (m.id !== parsed.messageId) return m;
-            const reactions = { ...(m.reactions || {}) };
-            const users = [...(reactions[parsed.emoji] || [])];
-            const idx = users.indexOf(parsed.username);
-            if (idx >= 0) {
-              users.splice(idx, 1);
-              if (users.length === 0) {
-                delete reactions[parsed.emoji];
-              } else {
-                reactions[parsed.emoji] = users;
-              }
-            } else {
-              reactions[parsed.emoji] = [...users, parsed.username];
-            }
-            return { ...m, reactions: Object.keys(reactions).length > 0 ? reactions : undefined };
-          }),
+          messages: prev.messages.map(m =>
+            m.id !== parsed.messageId ? m : { ...m, reactions: toggleReaction(m.reactions, parsed.emoji, parsed.username) }
+          ),
         }));
       });
 
