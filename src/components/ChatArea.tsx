@@ -58,7 +58,6 @@ export function ChatArea({
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isRoomNameHovered, setIsRoomNameHovered] = useState(false);
   const [notificationJiggle, setNotificationJiggle] = useState(false);
   const [inspectedFile, setInspectedFile] = useState<InspectedFile | null>(null);
   const [replyingTo, setReplyingTo] = useState<ReplyTo | null>(null);
