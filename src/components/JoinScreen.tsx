@@ -29,6 +29,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
+      <ChangelogDialog />
       <motion.form
         onSubmit={handleJoin}
         className="w-full max-w-sm space-y-5"
