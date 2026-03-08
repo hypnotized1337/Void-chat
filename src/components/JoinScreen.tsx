@@ -115,32 +115,26 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
           }
         }
       }
-      
-      if (!roomAlreadyHasPassword || !(await (async () => {
-        // Re-check if password still exists (may have been deleted above)
-        const { data: recheck } = await supabase.functions.invoke('room-password', {
-          body: { action: 'check', roomCode: roomName.trim() },
-        });
-        return recheck?.hasPassword;
-      })())) {
-        if (passwordProtect && roomPassword.trim()) {
+
+      // If stale password was cleaned up or room never had a password, allow setting new one
+      const stillHasPassword = roomAlreadyHasPassword && hasActiveUsersInRoom;
+      if (!stillHasPassword && passwordProtect && roomPassword.trim()) {
         // Only allow setting a password if the room is empty (no active users)
-        const channel = supabase.channel(`room:${roomName.trim()}`);
-        const hasActiveUsers = await new Promise<boolean>((resolve) => {
+        const channel2 = supabase.channel(`room-check:${roomName.trim()}`);
+        const roomHasUsers = await new Promise<boolean>((resolve) => {
           let resolved = false;
-          channel.on('presence', { event: 'sync' }, () => {
+          channel2.on('presence', { event: 'sync' }, () => {
             if (resolved) return;
             resolved = true;
-            const users = Object.keys(channel.presenceState());
+            const users = Object.keys(channel2.presenceState());
             resolve(users.length > 0);
           });
-          channel.subscribe();
-          // Timeout fallback — if no sync in 2s, assume empty
+          channel2.subscribe();
           setTimeout(() => { if (!resolved) { resolved = true; resolve(false); } }, 2000);
         });
-        supabase.removeChannel(channel);
+        supabase.removeChannel(channel2);
 
-        if (hasActiveUsers) {
+        if (roomHasUsers) {
           setRoomTaken(true);
           setError('ROOM ALREADY ACTIVE');
           toast.error('CANNOT SET PASSWORD', {
