@@ -65,6 +65,10 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
       if (roomAlreadyHasPassword) {
         // Room is already locked — must verify password regardless of toggle state
         if (!needsPassword) {
+          toast.info('ROOM IS LOCKED', {
+            description: 'This room is password-protected. Enter the password to join.',
+            duration: 4000,
+          });
           setNeedsPassword(true);
           setPasswordProtect(false);
           setCheckingRoom(false);
