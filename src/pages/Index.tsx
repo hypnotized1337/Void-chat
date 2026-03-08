@@ -119,13 +119,16 @@ const Index = () => {
           users={state.users}
           userCount={state.users.length}
           frozen={state.frozen}
+          gingerMode={state.gingerMode}
           onNuke={handleNuke}
           onFreeze={freezeChat}
           onAnnounce={sendAnnouncement}
           onKick={kickUser}
+          onToggleGinger={toggleGingerMode}
           onClose={() => setAdminOpen(false)}
         />
       )}
+      {state.gingerMode && <CloverRain />}
     </div>
   );
 };
