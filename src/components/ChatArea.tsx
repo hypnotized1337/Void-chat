@@ -9,6 +9,7 @@ import { FullscreenImageViewer } from '@/components/FullscreenImageViewer';
 import { ChatMessage, ReplyTo, RoomUser } from '@/types/chat';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { FileInspector, InspectedFile } from '@/components/chat/FileInspector';
+import { VideoInspector, InspectedVideo } from '@/components/chat/VideoInspector';
 import { ReplyPreview } from '@/components/chat/ReplyPreview';
 import { ACCEPTED_FILE_TYPES } from '@/components/chat/FileHelpers';
 import { ChatSidebar } from '@/components/ChatSidebar';
