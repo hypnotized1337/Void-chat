@@ -109,6 +109,7 @@ function getBubbleRadius(isOwn: boolean, groupInfo: MessageGroupInfo) {
 export const MessageBubble = memo(function MessageBubble({
   msg,
   isOwn,
+  currentUser,
   index,
   groupInfo,
   onImageClick,
