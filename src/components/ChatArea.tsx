@@ -28,6 +28,16 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// File type icon helper
+function getFileIcon(mimeType?: string, fileName?: string) {
+  const ext = fileName?.split('.').pop()?.toLowerCase();
+  if (mimeType === 'application/pdf' || ext === 'pdf') return FileText;
+  if (mimeType?.includes('zip') || ext === 'zip' || ext === 'rar' || ext === '7z') return FileArchive;
+  if (mimeType?.includes('word') || ext === 'doc' || ext === 'docx') return FileType;
+  if (mimeType === 'text/plain' || ext === 'txt') return FileText;
+  return File;
+}
+
 // File Inspector Modal Component
 interface FileInspectorProps {
   fileName: string;
