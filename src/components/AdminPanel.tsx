@@ -8,10 +8,12 @@ interface AdminPanelProps {
   users: RoomUser[];
   userCount: number;
   frozen: boolean;
+  gingerMode: boolean;
   onNuke: () => void;
   onFreeze: () => void;
   onAnnounce: (text: string) => void;
   onKick: (username: string) => void;
+  onToggleGinger: () => void;
   onClose: () => void;
 }
 
