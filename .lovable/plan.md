@@ -1,16 +1,19 @@
+## Plan: Admin Authentication, GIF Integration & Cleanup — COMPLETED
 
+### 1. Secure Admin Authentication ✅
+- `ADMIN_MASTER_KEY` stored as backend secret
+- `verify-admin` edge function with constant-time comparison
+- `AdminAuthOverlay` terminal-style component (black bg, green monospace)
+- `sessionStorage` persistence for admin status
+- `isRoomCreator` removed from ChatState and all references
 
-## Plan: Upgrade AI Model & Show Model Name
+### 2. GIF Integration (Klipy API) ✅
+- `KLIPY_API_KEY` stored as backend secret
+- `gif-search` edge function proxying to Klipy GIF Search API
+- `GifPicker` component with monochromatic grid, grayscale filter, color on hover
+- GIFs sent as ephemeral messages with 12-hour imageExpiry
 
-### Changes
-
-1. **`supabase/functions/summarize-changelog/index.ts`** — Change `model: 'google/gemini-2.5-flash-lite'` → `'google/gemini-2.5-flash'`
-
-2. **`supabase/functions/summarize-features/index.ts`** — Change `model: 'google/gemini-2.5-flash-lite'` → `'google/gemini-2.5-flash'`
-
-3. **`src/pages/Changelog.tsx`** (line 138) — Update the summary header text to include the model name: `ai summary · gemini-2.5-flash`
-
-4. **`src/pages/Features.tsx`** (line 67) — Update the header text to: `ai-generated · gemini-2.5-flash`
-
-5. **Clear cached summaries** — Delete rows from both `changelog_summaries` and `feature_summaries` tables so the new model regenerates them.
-
+### 3. Cleanup ✅
+- `exportHistory` removed (dead code)
+- Unused `ChatMessage` import removed from JoinScreen
+- `importedMessages` param removed from JoinScreen onJoin signature

@@ -64,7 +64,7 @@ export default function Features() {
           >
             <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border">
               <Sparkles className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">ai-generated from commit history</span>
+              <span className="text-[10px] text-muted-foreground">ai-generated · gemini-2.5-flash</span>
             </div>
             <div className="px-3 py-3 text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">
               {summary}
