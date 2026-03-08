@@ -39,6 +39,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
   const [username, setUsername] = useState('');
   const [roomName, setRoomName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [roomTaken, setRoomTaken] = useState(false);
   const [joining, setJoining] = useState(false);
   const [passwordProtect, setPasswordProtect] = useState(false);
   const [roomPassword, setRoomPassword] = useState('');
