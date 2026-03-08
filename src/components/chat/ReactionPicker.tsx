@@ -70,8 +70,6 @@ const EMOJI_MAP: Record<string, string[]> = {
   '🤷': ['shrug', 'idk', 'whatever', 'dunno'],
 };
 
-const FREQUENTLY_USED = ['👍', '❤️', '😂', '😭', '💀', '🔥', '💯', '😍', '🙏', '👀', '😤', '🥺'];
-
 const CATEGORIES = [
   { label: 'Popular', emojis: ['👍', '👎', '❤️', '😂', '😭', '💀', '🔥', '💯', '🙏', '👀', '🎉', '✅'] },
   { label: 'Faces', emojis: ['😀', '😆', '🤣', '😅', '🥹', '🤩', '😎', '🤔', '😏', '😈', '🤡', '🫠', '😮‍💨', '🤯', '😴', '🥴', '🫡'] },
