@@ -28,6 +28,7 @@ export default function Changelog() {
   const [summaryCached, setSummaryCached] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [commitsCached, setCommitsCached] = useState(false);
 
   useEffect(() => {
     async function fetchAllCommits() {
@@ -38,6 +39,7 @@ export default function Changelog() {
 
         const allData: CachedCommit[] = data.commits || [];
         setAllCommits(allData);
+        setCommitsCached(!!data.cached);
 
         const grouped: Record<string, CachedCommit[]> = {};
         allData.forEach(c => {
@@ -90,7 +92,12 @@ export default function Changelog() {
         </Link>
 
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-sm font-medium tracking-tight">changelog</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-medium tracking-tight">changelog</h1>
+            {commitsCached && (
+              <span className="text-[9px] text-muted-foreground/60 border border-border rounded px-1 py-0.5 leading-none">cached</span>
+            )}
+          </div>
           {!loading && !error && allCommits.length > 0 && !summary && (
             <button
               onClick={handleSummarize}
