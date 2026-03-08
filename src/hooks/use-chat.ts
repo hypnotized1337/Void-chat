@@ -392,11 +392,11 @@ export function useChat() {
           setState(prev => ({ ...prev, messages: [] }));
         }
 
-        // Post-join duplicate check: if the presence key has multiple entries, someone else has this username
+        // Post-join duplicate check: wait for presence to settle, then check
         if (!duplicateChecked && !skipDuplicateCheck) {
-          duplicateChecked = true;
           const entries = presenceState[username];
           if (entries && entries.length > 1) {
+            duplicateChecked = true;
             // Duplicate detected — leave immediately
             channel.untrack().then(() => supabase.removeChannel(channel)).catch(() => supabase.removeChannel(channel));
             channelRef.current = null;
@@ -414,7 +414,6 @@ export function useChat() {
             resolveJoin({ error: 'Username already active in this void. Please choose another identity.' });
             return;
           }
-          resolveJoin({ error: null });
         }
       });
 
