@@ -432,7 +432,7 @@ export function useChat() {
       channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await channel.track({ username, joinedAt: Date.now() });
-          channel.send({ type: 'broadcast', event: 'system', payload: systemMsg });
+          // Don't broadcast join message yet — wait for duplicate check
           // Resolve after a delay to allow presence sync with duplicate info
           if (skipDuplicateCheck) {
             resolveJoin({ error: null });
