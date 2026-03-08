@@ -255,7 +255,7 @@ export function useChat() {
             } else {
               body = `${msg.username} sent a message`;
             }
-            new Notification(state.roomCode, { body, icon: '/favicon.ico' });
+            new Notification(roomCodeRef.current, { body, icon: '/favicon.ico' });
 
             notifCooldownRef.current = window.setTimeout(() => {
               if (pendingNotifCount.current > 0) {
