@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are describing "v0id", an anonymous ephemeral chat application. Based on the commit history provided, write a concise summary of what the app does and list its key features. Use - bullet points. Be specific (e.g. "GIF picker powered by Klipy API" not "media support"). Keep it under 20 bullets. No intro paragraph, just the bullet list.`,
+            content: `You are describing "v0id", an anonymous ephemeral chat application. Based on the commit history provided, identify and list the MAIN, most important features of the app — not minor tweaks or small UI changes. Focus on core functionality that defines what the app does. Use - bullet points. Be specific (e.g. "GIF picker powered by Klipy API" not "media support"). Keep it under 15 bullets. No intro paragraph, just the bullet list.`,
           },
           {
             role: 'user',
