@@ -46,6 +46,30 @@ interface MessageBubbleProps {
   onEditTextChange: (text: string) => void;
   onEditSubmit: (id: string) => void;
   onEditCancel: () => void;
+  quickReactions: string[];
+  frequentlyUsed: string[];
+  recordReaction: (emoji: string) => void;
+}
+
+const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
+
+function renderMessageText(text: string) {
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  URL_RE.lastIndex = 0;
+  while ((match = URL_RE.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    const url = match[0];
+    parts.push(
+      <a key={match.index} href={url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 decoration-current/40 hover:decoration-current inline-flex items-baseline gap-0.5 break-all">
+        {url}<ExternalLink className="w-2.5 h-2.5 inline shrink-0 translate-y-[1px]" />
+      </a>
+    );
+    lastIndex = match.index + url.length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.length > 0 ? parts : text;
 }
 
 const formatTime = (ts: number) =>
