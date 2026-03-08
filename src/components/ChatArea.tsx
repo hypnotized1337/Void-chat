@@ -290,25 +290,33 @@ export function ChatArea({
             const isLastInGroup = !isGroupable || !next || next.type !== 'message' || next.deleted || next.username !== msg.username;
 
             return (
-              <MessageBubble
-                key={msg.id}
-                msg={msg}
-                isOwn={msg.username === currentUser}
-                index={i}
-                groupInfo={{ isFirstInGroup, isLastInGroup }}
-                onImageClick={setFullscreenImage}
-                onInspectFile={setInspectedFile}
-                onEdit={handleStartEdit}
-                onUnsend={onUnsend}
-                onReply={setReplyingTo}
-                onReact={onReact}
-                onScrollToMessage={scrollToMessage}
-                editingId={editingId}
-                editText={editText}
-                onEditTextChange={setEditText}
-                onEditSubmit={handleEditSubmit}
-                onEditCancel={handleEditCancel}
-              />
+              <div key={msg.id}>
+                {unreadMarkerId === msg.id && (
+                  <div className="flex items-center gap-3 my-2 px-2">
+                    <div className="flex-1 h-px bg-destructive/40" />
+                    <span className="text-[10px] font-mono text-destructive/60 shrink-0">new messages</span>
+                    <div className="flex-1 h-px bg-destructive/40" />
+                  </div>
+                )}
+                <MessageBubble
+                  msg={msg}
+                  isOwn={msg.username === currentUser}
+                  index={i}
+                  groupInfo={{ isFirstInGroup, isLastInGroup }}
+                  onImageClick={setFullscreenImage}
+                  onInspectFile={setInspectedFile}
+                  onEdit={handleStartEdit}
+                  onUnsend={onUnsend}
+                  onReply={setReplyingTo}
+                  onReact={onReact}
+                  onScrollToMessage={scrollToMessage}
+                  editingId={editingId}
+                  editText={editText}
+                  onEditTextChange={setEditText}
+                  onEditSubmit={handleEditSubmit}
+                  onEditCancel={handleEditCancel}
+                />
+              </div>
             );
           })}
         </AnimatePresence>
