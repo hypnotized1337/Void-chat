@@ -13,6 +13,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import { ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { StatusIcon } from './StatusIcon';
 import { ImageAttachment } from './ImageAttachment';
@@ -20,7 +21,6 @@ import { FileAttachment } from './FileAttachment';
 import { isImageOrGif, isImageExpired } from './FileHelpers';
 import { SelfDestructTimer } from './SelfDestructTimer';
 import { ReactionPicker } from './ReactionPicker';
-import { useFrequentReactions } from '@/hooks/use-frequent-reactions';
 import type { InspectedFile } from './FileInspector';
 import type { ReplyTo } from '@/types/chat';
 
