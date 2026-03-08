@@ -208,7 +208,7 @@ export function ChatArea({
       )}
 
       {/* Header */}
-      <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card">
+      <header className="h-12 flex items-center justify-between px-4 shrink-0 bg-card/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-20">
         <span className="text-sm font-medium text-foreground font-mono cursor-default select-none">
           {currentUser}
         </span>
