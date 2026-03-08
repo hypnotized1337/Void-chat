@@ -706,6 +706,7 @@ export function useChat() {
 
     if (error) {
       console.error('Upload failed:', error.message);
+      toast.error('Upload failed — file may be too large or unsupported.');
       return;
     }
 
