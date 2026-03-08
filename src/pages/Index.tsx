@@ -78,6 +78,8 @@ const Index = () => {
         frozen={state.frozen}
         frozenBy={state.frozenBy}
         nuking={nuking}
+        uiScale={uiScale}
+        onScaleChange={handleScaleChange}
         onSend={handleSend}
         onTyping={sendTyping}
         onToggleNotifications={toggleNotifications}

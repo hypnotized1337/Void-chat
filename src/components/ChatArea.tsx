@@ -227,8 +227,8 @@ export function ChatArea({
                 </div>
                 <Slider
                   value={[uiScale]}
-                  onValueChange={handleScaleChange}
-                  min={50}
+                  onValueChange={onScaleChange}
+                  min={70}
                   max={150}
                   step={5}
                 />
