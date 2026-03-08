@@ -2,7 +2,6 @@ import { memo, useState, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useFrequentReactions } from '@/hooks/use-frequent-reactions';
 
 const EMOJI_MAP: Record<string, string[]> = {
   '👍': ['thumbs up', 'like', 'yes', 'ok', 'good', 'approve'],
