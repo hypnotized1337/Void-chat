@@ -318,13 +318,13 @@ export const MessageBubble = memo(function MessageBubble({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div className={`group flex items-center gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-            {isOwn && (
+            {isOwn && !groupInfo.isLastInGroup && (
               <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] font-mono text-muted-foreground whitespace-nowrap select-none">
                 {formatTime(msg.timestamp)}
               </span>
             )}
             {bubble}
-            {!isOwn && (
+            {!isOwn && !groupInfo.isLastInGroup && (
               <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] font-mono text-muted-foreground whitespace-nowrap select-none">
                 {formatTime(msg.timestamp)}
               </span>
