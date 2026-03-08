@@ -1,19 +1,28 @@
-## Plan: Admin Authentication, GIF Integration & Cleanup — COMPLETED
 
-### 1. Secure Admin Authentication ✅
-- `ADMIN_MASTER_KEY` stored as backend secret
-- `verify-admin` edge function with constant-time comparison
-- `AdminAuthOverlay` terminal-style component (black bg, green monospace)
-- `sessionStorage` persistence for admin status
-- `isRoomCreator` removed from ChatState and all references
 
-### 2. GIF Integration (Klipy API) ✅
-- `KLIPY_API_KEY` stored as backend secret
-- `gif-search` edge function proxying to Klipy GIF Search API
-- `GifPicker` component with monochromatic grid, grayscale filter, color on hover
-- GIFs sent as ephemeral messages with 12-hour imageExpiry
+## Problem
 
-### 3. Cleanup ✅
-- `exportHistory` removed (dead code)
-- Unused `ChatMessage` import removed from JoinScreen
-- `importedMessages` param removed from JoinScreen onJoin signature
+When user A creates a room **without** password protection and is active in it, user B can join with the password toggle ON and it lets them set a password — overriding the creator's intent.
+
+**Root cause**: The presence check uses channel `peek:${roomName}` but the actual chat room uses channel `room:${roomName}`. These are separate Realtime channels, so the peek always sees 0 users and assumes the room is empty.
+
+## Fix
+
+**In `src/components/JoinScreen.tsx` (line 87):**
+
+Change the peek channel name from:
+```
+supabase.channel(`peek:${roomName.trim()}`)
+```
+to:
+```
+supabase.channel(`room:${roomName.trim()}`)
+```
+
+This makes the peek subscribe to the **same** presence channel that active chat users are on, so it correctly detects existing users and blocks password setting.
+
+**Note**: After subscribing to check presence, we still call `supabase.removeChannel(channel)` immediately, so the joiner doesn't linger on the channel before actually joining the room through the normal flow.
+
+## Files Changed
+- `src/components/JoinScreen.tsx` — one line change (channel name)
+
