@@ -84,7 +84,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
         }
       } else if (passwordProtect && roomPassword.trim()) {
         // Only allow setting a password if the room is empty (no active users)
-        const channel = supabase.channel(`peek:${roomName.trim()}`);
+        const channel = supabase.channel(`room:${roomName.trim()}`);
         const hasActiveUsers = await new Promise<boolean>((resolve) => {
           let resolved = false;
           channel.on('presence', { event: 'sync' }, () => {
