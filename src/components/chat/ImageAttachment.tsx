@@ -21,7 +21,7 @@ export const ImageAttachment = memo(function ImageAttachment({ imageUrl, hasText
         className="max-w-full rounded-lg mb-1 border border-foreground/20 grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer"
         loading="lazy"
       />
-      {!hasText && (
+      {!hasText && imageUrl.includes('klipy') && (
         <span className="absolute bottom-2 right-1.5 text-[8px] font-mono text-foreground/80 bg-background/60 px-1 py-0.5 rounded">via KLIPY</span>
       )}
     </div>
