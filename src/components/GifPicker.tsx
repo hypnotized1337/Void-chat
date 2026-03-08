@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import poweredByKlipy from '@/assets/powered-by-klipy.png';
+import poweredByKlipy from '@/assets/powered-by-klipy.svg';
 import { Search, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
