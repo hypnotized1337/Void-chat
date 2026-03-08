@@ -35,6 +35,7 @@ export function ChatArea({
   typingUsers,
   frozen,
   frozenBy,
+  nuking,
   onSend,
   onTyping,
   onToggleNotifications,
