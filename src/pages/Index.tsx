@@ -43,12 +43,9 @@ const Index = () => {
   }, [nukeRoom]);
 
   const handleJoin = async (username: string, roomCode: string) => {
-    const isAdmin = sessionStorage.getItem('is_admin') === 'true';
-    if (!isAdmin) {
-      const available = await checkUsernameAvailable(username, roomCode);
-      if (!available) {
-        return { error: 'Username already active in this void. Please choose another identity.' };
-      }
+    const available = await checkUsernameAvailable(username, roomCode);
+    if (!available) {
+      return { error: 'Username already active in this void. Please choose another identity.' };
     }
     joinRoom(username, roomCode);
     return { error: null };
