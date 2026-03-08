@@ -319,6 +319,7 @@ export function ChatArea({
                 <MessageBubble
                   msg={msg}
                   isOwn={msg.username === currentUser}
+                  currentUser={currentUser}
                   index={i}
                   groupInfo={groupInfo}
                   onImageClick={setFullscreenImage}
