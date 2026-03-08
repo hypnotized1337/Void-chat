@@ -41,6 +41,7 @@ export function ChatArea({
   currentUser,
   roomCode,
   users,
+  notificationsEnabled,
   typingUsers,
   frozen,
   frozenBy,
