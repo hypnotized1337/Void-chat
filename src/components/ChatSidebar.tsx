@@ -27,10 +27,10 @@ export function ChatSidebar({ roomCode, users, currentUser, onLeave, className }
   
   return (
     <div className={`w-56 h-full bg-card/80 backdrop-blur-sm flex flex-col shrink-0 border-r border-border/20 ${className ?? 'hidden md:flex'}`}>
-      <div className="p-4">
-        <span className="text-xs font-medium text-muted-foreground">Room</span>
+      <div className="p-4 pb-3">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/50">Room</span>
         <p 
-          className="text-sm font-medium text-foreground truncate mt-0.5 font-mono cursor-default select-none transition-all duration-200"
+          className="text-sm font-medium text-foreground truncate mt-1 font-mono cursor-default select-none transition-all duration-200"
           onMouseEnter={() => setIsRoomNameHovered(true)}
           onMouseLeave={() => setIsRoomNameHovered(false)}
           title="Hover to reveal"
