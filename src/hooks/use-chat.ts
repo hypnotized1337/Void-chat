@@ -36,7 +36,6 @@ const ChatMessageSchema = z.object({
   fileSize: z.number().optional(),
   fileMimeType: z.string().max(100).optional(),
   replyTo: ReplyToSchema,
-  reactions: z.record(z.array(z.string().max(20))).optional(),
 });
 
 const TypingSchema = z.object({ username: z.string().max(20) });
