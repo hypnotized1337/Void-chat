@@ -233,7 +233,7 @@ export function ChatArea({
       )}
 
       {/* Header */}
-      <header className="h-12 flex items-center px-4 shrink-0 bg-card/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-20">
+      <header className="h-12 flex items-center px-4 shrink-0 bg-card/80 backdrop-blur-xl border-b border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.3)] sticky top-0 z-20">
         <button
           onClick={() => setMobileSidebarOpen(true)}
           className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors md:hidden"
