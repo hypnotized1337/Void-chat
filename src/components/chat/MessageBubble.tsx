@@ -17,7 +17,6 @@ import { VideoAttachment } from './VideoAttachment';
 import { isImageOrGif, isImageExpired, isVideo } from './FileHelpers';
 import type { InspectedVideo } from './VideoInspector';
 import { SelfDestructTimer } from './SelfDestructTimer';
-import { ReactionPicker } from './ReactionPicker';
 import type { InspectedFile } from './FileInspector';
 import type { ReplyTo } from '@/types/chat';
 
