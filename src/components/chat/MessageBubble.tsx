@@ -205,9 +205,9 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       ) : (
         <div
-          className={`px-3 py-2 text-sm leading-relaxed transition-[filter] duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
+          className={`px-3.5 py-2 text-sm leading-relaxed transition-[filter] duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
             isOwn
-              ? 'bg-message-own text-message-own-foreground'
+              ? 'bg-message-own text-message-own-foreground shadow-sm'
               : 'bg-message-other text-message-other-foreground'
           }`}
         >
