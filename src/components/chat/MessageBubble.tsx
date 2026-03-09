@@ -37,16 +37,12 @@ interface MessageBubbleProps {
   onEdit: (id: string, text: string) => void;
   onUnsend: (id: string) => void;
   onReply: (replyTo: ReplyTo) => void;
-  onReact: (messageId: string, emoji: string) => void;
   onScrollToMessage?: (id: string) => void;
   editingId: string | null;
   editText: string;
   onEditTextChange: (text: string) => void;
   onEditSubmit: (id: string) => void;
   onEditCancel: () => void;
-  quickReactions: string[];
-  frequentlyUsed: string[];
-  recordReaction: (emoji: string) => void;
 }
 
 const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
