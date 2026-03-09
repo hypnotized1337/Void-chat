@@ -58,7 +58,6 @@ export function ChatArea({
   onUnsend,
   onSendImage,
   onSendGif,
-  onReact,
 }: ChatAreaProps) {
   const [input, setInput] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
