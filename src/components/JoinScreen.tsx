@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2, GitCommit, Sparkles, Lock, Plus, LogIn } from 'lucide-react';
+import { ArrowRight, Loader2, GitCommit, Lock, Plus, LogIn } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
@@ -497,9 +497,6 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
         >
           <Link to="/changelog" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/80 hover:text-foreground font-mono transition-colors">
             <GitCommit className="w-3.5 h-3.5" /> changelog
-          </Link>
-          <Link to="/features" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/80 hover:text-foreground font-mono transition-colors">
-            <Sparkles className="w-3.5 h-3.5" /> features
           </Link>
         </motion.div>
       </motion.form>
