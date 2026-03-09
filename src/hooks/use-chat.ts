@@ -226,6 +226,8 @@ export function useChat() {
             } else if (msg.replyTo) {
               const replyText = msg.text ? `"${msg.text.slice(0, 80)}"` : '';
               body = `${msg.username} replied to ${msg.replyTo.username}: ${replyText}`;
+            } else if (msg.text && /https?:\/\/[^\s]/.test(msg.text)) {
+              body = `${msg.username} sent a link 🔗`;
             } else if (msg.text) {
               const truncated = msg.text.length > 100 ? msg.text.slice(0, 100) + '…' : msg.text;
               body = `${msg.username} said: "${truncated}"`;
