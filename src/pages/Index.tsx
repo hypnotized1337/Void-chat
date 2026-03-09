@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useChat } from '@/hooks/use-chat';
 import { useScreenshotDetect } from '@/hooks/use-screenshot-detect';
 import { JoinScreen } from '@/components/JoinScreen';
