@@ -51,8 +51,8 @@ export function ChatSidebar({ roomCode, users, currentUser, onLeave, className }
 
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin">
         <div className="flex items-center gap-1.5 mb-3">
-          <Users className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">Online — {users.length}</span>
+          <Users className="w-3 h-3 text-muted-foreground/50" />
+          <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/50">Online · {users.length}</span>
         </div>
         <div className="space-y-0.5">
           <AnimatePresence initial={false}>
