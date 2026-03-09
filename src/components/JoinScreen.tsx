@@ -237,7 +237,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
             
           <GlitchTitle />
-          <p className="text-[10px] font-mono text-muted-foreground/30 tracking-[0.2em] uppercase mt-1.5">ephemeral chat</p>
+          <p className="text-[10px] font-mono text-muted-foreground/30 tracking-[0.2em] uppercase mt-1.5">secure chat</p>
         </motion.div>
 
         {/* Mode tabs */}
