@@ -429,16 +429,24 @@ export function ChatArea({
       </AnimatePresence>
 
       {/* Typing indicator */}
-      {typingUsers.length > 0 && (
-        <div className="px-4 pb-1 flex items-center gap-2">
-          <div className="bg-message-other rounded-2xl rounded-bl-sm px-3 py-2 flex items-center gap-1">
-            <span className="typing-dot w-1.5 h-1.5 rounded-full bg-muted-foreground inline-block" />
-            <span className="typing-dot w-1.5 h-1.5 rounded-full bg-muted-foreground inline-block" />
-            <span className="typing-dot w-1.5 h-1.5 rounded-full bg-muted-foreground inline-block" />
-          </div>
-          <span className="text-[11px] text-muted-foreground">{typingUsers.join(', ')}</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {typingUsers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.2 }}
+            className="px-4 pb-1 flex items-center gap-2"
+          >
+            <div className="bg-message-other rounded-2xl rounded-bl-sm px-2.5 py-1.5 flex items-center gap-1">
+              <span className="typing-dot w-1 h-1 rounded-full bg-muted-foreground inline-block" />
+              <span className="typing-dot w-1 h-1 rounded-full bg-muted-foreground inline-block" />
+              <span className="typing-dot w-1 h-1 rounded-full bg-muted-foreground inline-block" />
+            </div>
+            <span className="text-[10px] text-muted-foreground">{typingUsers.join(', ')}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* File input */}
       <input
