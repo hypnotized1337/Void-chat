@@ -9,6 +9,7 @@ import {
   ContextMenuItem,
 } from '@/components/ui/context-menu';
 import { ExternalLink } from 'lucide-react';
+import { LinkPreview } from './LinkPreview';
 import { toast } from 'sonner';
 import { StatusIcon } from './StatusIcon';
 import { ImageAttachment } from './ImageAttachment';
@@ -46,6 +47,14 @@ interface MessageBubbleProps {
 }
 
 const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
+const IMAGE_EXT_RE = /\.(gif|png|jpg|jpeg|webp|svg)(\?|$)/i;
+
+function extractFirstUrl(text: string): string | null {
+  URL_RE.lastIndex = 0;
+  const m = URL_RE.exec(text);
+  if (m && !IMAGE_EXT_RE.test(m[0])) return m[0];
+  return null;
+}
 
 function renderMessageText(text: string) {
   const parts: (string | JSX.Element)[] = [];
@@ -237,6 +246,7 @@ export const MessageBubble = memo(function MessageBubble({
             />
           )}
           {msg.text && renderMessageText(msg.text)}
+          {msg.text && !msg.isGif && (() => { const u = extractFirstUrl(msg.text); return u ? <LinkPreview url={u} /> : null; })()}
         </div>
       )}
 
