@@ -97,7 +97,7 @@ const messageVariants = {
 
 function getBubbleRadius(isOwn: boolean, groupInfo: MessageGroupInfo) {
   const { isFirstInGroup, isLastInGroup } = groupInfo;
-  
+
   if (isOwn) {
     if (isFirstInGroup && isLastInGroup) return 'rounded-2xl rounded-br-sm';
     if (isFirstInGroup) return 'rounded-2xl rounded-br-md';
@@ -139,10 +139,10 @@ export const MessageBubble = memo(function MessageBubble({
         initial="hidden"
         animate="visible"
         custom={index}
-        className="flex justify-center py-0.5"
+        className="flex justify-center py-1.5"
       >
-        <span className="text-[10px] text-muted-foreground/60 font-mono select-none tracking-widest uppercase">
-          [sys] :: {msg.text}
+        <span className="text-[10px] text-muted-foreground/70 font-mono bg-white/5 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm select-none">
+          {msg.text}
         </span>
       </motion.div>
     );
@@ -188,7 +188,7 @@ export const MessageBubble = memo(function MessageBubble({
   const bubble = (
     <div className={`max-w-[75%] space-y-0.5 ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
       {showUsername && (
-        <span className="text-[10px] font-mono tracking-tight text-white/70 ml-1 mb-0.5 uppercase">{msg.username}</span>
+        <span className="text-[11px] text-muted-foreground ml-1">{msg.username}</span>
       )}
 
       {msg.replyTo && (
@@ -218,8 +218,8 @@ export const MessageBubble = memo(function MessageBubble({
         <div
           className={`px-3.5 py-2 text-[13px] leading-relaxed transition-all duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
             isOwn
-              ? 'bg-message-own text-message-own-foreground shadow-[0_1px_4px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.04)] border border-white/[0.08]'
-              : 'bg-message-other text-message-other-foreground shadow-[0_1px_3px_rgba(0,0,0,0.2)] border border-white/[0.04]'
+              ? 'bg-gradient-to-br from-white/[0.12] to-white/[0.04] text-message-own-foreground shadow-[0_1px_4px_rgba(255,255,255,0.08)] border border-white/5'
+              : 'bg-message-other text-message-other-foreground shadow-[0_1px_3px_rgba(0,0,0,0.2)] border border-white/[0.03]'
           }`}
         >
           {msg.imageUrl && (
@@ -253,9 +253,9 @@ export const MessageBubble = memo(function MessageBubble({
       )}
 
       {groupInfo.isLastInGroup && (
-        <div className={`flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity duration-200 mt-0.5 ${isOwn ? 'justify-end mr-1' : 'ml-1'}`}>
-          <span className="text-[9px] font-mono tracking-wider">{formatTime(msg.timestamp)}</span>
-          {msg.edited && <span className="text-[9px] font-mono tracking-wider">· [EDIT]</span>}
+        <div className={`flex items-center gap-1 ${isOwn ? 'justify-end mr-1' : 'ml-1'}`}>
+          <span className="text-[10px] text-muted-foreground">{formatTime(msg.timestamp)}</span>
+          {msg.edited && <span className="text-[10px] text-muted-foreground">· edited</span>}
           {isOwn && msg.status && <StatusIcon status={msg.status} />}
           <SelfDestructTimer timestamp={msg.timestamp} />
         </div>
@@ -292,13 +292,13 @@ export const MessageBubble = memo(function MessageBubble({
         <ContextMenuTrigger asChild>
           <div className={`group flex items-center gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
             {isOwn && !groupInfo.isLastInGroup && (
-              <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:-translate-y-0.5 text-[9px] font-mono tracking-wider text-muted-foreground whitespace-nowrap select-none">
+              <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:-translate-y-0.5 text-[10px] font-mono text-muted-foreground whitespace-nowrap select-none">
                 {formatTime(msg.timestamp)}
               </span>
             )}
             {bubble}
             {!isOwn && !groupInfo.isLastInGroup && (
-              <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:-translate-y-0.5 text-[9px] font-mono tracking-wider text-muted-foreground whitespace-nowrap select-none">
+              <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:-translate-y-0.5 text-[10px] font-mono text-muted-foreground whitespace-nowrap select-none">
                 {formatTime(msg.timestamp)}
               </span>
             )}
