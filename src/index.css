@@ -268,35 +268,3 @@ textarea:focus {
 .tactile-press:active {
   transform: scale(0.95);
 }
-
-@keyframes void-glow {
-  0%, 100% {
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.3);
-  }
-  50% {
-    text-shadow: 0 0 24px rgba(255, 255, 255, 0.4);
-    color: rgba(255, 255, 255, 0.7);
-  }
-}
-
-.void-glow-pulse {
-  animation: void-glow 4s ease-in-out infinite;
-}
-
-/* Custom Scrollbar for Void Aesthetic */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}

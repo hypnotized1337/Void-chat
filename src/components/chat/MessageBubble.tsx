@@ -97,7 +97,7 @@ const messageVariants = {
 
 function getBubbleRadius(isOwn: boolean, groupInfo: MessageGroupInfo) {
   const { isFirstInGroup, isLastInGroup } = groupInfo;
-
+  
   if (isOwn) {
     if (isFirstInGroup && isLastInGroup) return 'rounded-2xl rounded-br-sm';
     if (isFirstInGroup) return 'rounded-2xl rounded-br-md';
@@ -218,7 +218,7 @@ export const MessageBubble = memo(function MessageBubble({
         <div
           className={`px-3.5 py-2 text-[13px] leading-relaxed transition-all duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
             isOwn
-              ? 'bg-gradient-to-br from-white/[0.12] to-white/[0.04] text-message-own-foreground shadow-[0_1px_4px_rgba(255,255,255,0.08)] border border-white/5'
+              ? 'bg-message-own text-message-own-foreground shadow-[0_1px_4px_rgba(255,255,255,0.08)] border border-white/5'
               : 'bg-message-other text-message-other-foreground shadow-[0_1px_3px_rgba(0,0,0,0.2)] border border-white/[0.03]'
           }`}
         >

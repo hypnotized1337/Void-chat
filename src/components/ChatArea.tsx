@@ -299,16 +299,16 @@ export function ChatArea({
         {/* Empty state */}
         {!nuking && messages.length === 0 && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center p-4"
+            className="absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <div className="flex flex-col items-center gap-2 max-w-sm text-center">
-              <span className="text-sm font-mono text-muted-foreground/60 select-none void-glow-pulse">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-sm font-mono text-muted-foreground/30 select-none void-pulse">
                 say something into the void
               </span>
-              <span className="text-[10px] font-mono text-muted-foreground/20 select-none uppercase tracking-widest">
+              <span className="text-[10px] font-mono text-muted-foreground/15 select-none">
                 messages are ephemeral
               </span>
             </div>
@@ -317,35 +317,35 @@ export function ChatArea({
 
         <AnimatePresence initial={false}>
           {!nuking && groupedMessages.map(({ msg, groupInfo }, i) => (
-            <div key={msg.id}>
-              {unreadMarkerId === msg.id && (
-                <div className="flex items-center gap-3 my-2 px-2">
-                  <div className="flex-1 unread-marker-line" />
-                  <span className="text-[10px] font-mono text-foreground font-semibold shrink-0">new messages</span>
-                  <div className="flex-1 unread-marker-line" />
-                </div>
-              )}
-              <MessageBubble
-                msg={msg}
-                isOwn={msg.username === currentUser}
-                currentUser={currentUser}
-                index={i}
-                groupInfo={groupInfo}
-                onImageClick={setFullscreenImage}
-                onInspectFile={setInspectedFile}
-                onInspectVideo={setInspectedVideo}
-                onEdit={handleStartEdit}
-                onUnsend={onUnsend}
-                onReply={setReplyingTo}
-                onScrollToMessage={scrollToMessage}
-                editingId={editingId}
-                editText={editText}
-                onEditTextChange={setEditText}
-                onEditSubmit={handleEditSubmit}
-                onEditCancel={handleEditCancel}
-              />
-            </div>
-          ))}
+              <div key={msg.id}>
+                {unreadMarkerId === msg.id && (
+                  <div className="flex items-center gap-3 my-2 px-2">
+                    <div className="flex-1 unread-marker-line" />
+                    <span className="text-[10px] font-mono text-foreground font-semibold shrink-0">new messages</span>
+                    <div className="flex-1 unread-marker-line" />
+                  </div>
+                )}
+                <MessageBubble
+                  msg={msg}
+                  isOwn={msg.username === currentUser}
+                  currentUser={currentUser}
+                  index={i}
+                  groupInfo={groupInfo}
+                  onImageClick={setFullscreenImage}
+                  onInspectFile={setInspectedFile}
+                  onInspectVideo={setInspectedVideo}
+                  onEdit={handleStartEdit}
+                  onUnsend={onUnsend}
+                  onReply={setReplyingTo}
+                  onScrollToMessage={scrollToMessage}
+                  editingId={editingId}
+                  editText={editText}
+                  onEditTextChange={setEditText}
+                  onEditSubmit={handleEditSubmit}
+                  onEditCancel={handleEditCancel}
+                />
+              </div>
+            ))}
 
         </AnimatePresence>
 
@@ -483,7 +483,7 @@ export function ChatArea({
             />
           </div>
         )}
-        <div className="flex gap-1 items-center border border-border/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] focus-within:border-white/20 focus-within:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6),0_0_12px_rgba(255,255,255,0.08)] rounded-xl bg-black/40 backdrop-blur-md px-1.5 transition-all duration-300">
+        <div className="flex gap-1 items-center border border-border/30 focus-within:border-white/30 focus-within:shadow-[0_0_12px_rgba(255,255,255,0.1)] rounded-xl bg-card/40 backdrop-blur-sm px-1.5 transition-all duration-300">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -510,8 +510,9 @@ export function ChatArea({
           <motion.button
             type="submit"
             disabled={!input.trim() || isInputDisabled}
-            className={`p-2.5 rounded-lg transition-all disabled:opacity-10 disabled:cursor-not-allowed flex items-center justify-center ${input.trim() ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-muted text-muted-foreground'
-              }`}
+            className={`p-2.5 rounded-lg transition-all disabled:opacity-10 disabled:cursor-not-allowed flex items-center justify-center ${
+              input.trim() ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-muted text-muted-foreground'
+            }`}
             whileTap={{ scale: 0.9, rotate: -12 }}
           >
             <Send className="w-4 h-4 ml-0.5" />
