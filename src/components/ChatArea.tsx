@@ -247,16 +247,7 @@ export function ChatArea({
           </div>
         )}
         <div className="flex-1 flex justify-center">
-          <div className="flex gap-[3px] items-center text-muted-foreground/50" title={`Room: ${roomCode}`}>
-            {Array.from({ length: Math.min(roomCode.length, 12) }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-current"
-                animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.1, ease: 'easeInOut' }}
-              />
-            ))}
-          </div>
+          {/* Room code display removed per user request */}
         </div>
         <div className="flex items-center gap-1.5">
           <Popover>
