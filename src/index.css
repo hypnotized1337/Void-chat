@@ -253,11 +253,9 @@
   50%      { opacity: 0.6; }
 }
 
-/* ── Input Focus Glow ─────────────────────────────────── */
+/* ── Input Focus Glow Removed ───────────────────────────── */
 input:focus,
 textarea:focus {
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
   outline: none;
 }
 

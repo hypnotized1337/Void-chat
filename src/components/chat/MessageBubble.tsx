@@ -216,10 +216,10 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       ) : (
         <div
-          className={`px-3.5 py-2 text-[13px] leading-relaxed transition-all duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
+          className={`px-4 py-2.5 text-[14px] leading-relaxed transition-all duration-150 hover:brightness-110 w-fit max-w-full select-none ${radiusClass} ${
             isOwn
-              ? 'bg-message-own text-message-own-foreground shadow-[0_1px_4px_rgba(255,255,255,0.08)] border border-white/5'
-              : 'bg-message-other text-message-other-foreground shadow-[0_1px_3px_rgba(0,0,0,0.2)] border border-white/[0.03]'
+              ? 'bg-white/10 text-foreground border border-white/5 shadow-[0_4px_12px_rgba(0,0,0,0.1)]'
+              : 'bg-black/40 text-foreground border border-white/[0.04] shadow-[0_4px_12px_rgba(0,0,0,0.2)]'
           }`}
         >
           {msg.imageUrl && (
