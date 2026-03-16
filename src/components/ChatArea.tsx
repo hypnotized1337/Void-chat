@@ -1,18 +1,17 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Send, Bell, BellOff, LogOut, Plus, ChevronDown, ZoomIn, Users, Lock } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Slider } from '@/components/ui/slider';
+import { ChevronDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GifPicker } from '@/components/GifPicker';
 import { FullscreenImageViewer } from '@/components/FullscreenImageViewer';
 import { ChatMessage, ReplyTo, RoomUser } from '@/types/chat';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { FileInspector, InspectedFile } from '@/components/chat/FileInspector';
 import { VideoInspector, InspectedVideo } from '@/components/chat/VideoInspector';
-import { ReplyPreview } from '@/components/chat/ReplyPreview';
 import { ACCEPTED_FILE_TYPES } from '@/components/chat/FileHelpers';
 import { ChatSidebar } from '@/components/ChatSidebar';
+import { ChatHeader } from '@/components/chat/ChatHeader';
+import { ChatInput } from '@/components/chat/ChatInput';
+import React from 'react';
 
 interface ChatAreaProps {
   messages: ChatMessage[];
@@ -36,6 +35,80 @@ interface ChatAreaProps {
   onSendImage: (file: File, onProgress?: (p: number) => void) => void;
   onSendGif: (url: string) => void;
 }
+
+interface MessageListProps {
+  groupedMessages: { msg: ChatMessage; groupInfo: { isFirstInGroup: boolean; isLastInGroup: boolean } }[];
+  nuking: boolean;
+  unreadMarkerId: string | null;
+  currentUser: string;
+  editingId: string | null;
+  editText: string;
+  setFullscreenImage: (url: string | null) => void;
+  setInspectedFile: (file: InspectedFile | null) => void;
+  setInspectedVideo: (video: InspectedVideo | null) => void;
+  handleStartEdit: (id: string, text: string) => void;
+  onUnsend: (id: string) => void;
+  setReplyingTo: (reply: ReplyTo | null) => void;
+  scrollToMessage: (id: string) => void;
+  setEditText: (text: string) => void;
+  handleEditSubmit: (id: string) => void;
+  handleEditCancel: () => void;
+}
+
+// Extract MessageList to prevent re-rendering all messages on minor ChatArea state changes (e.g., input typing, scrolling)
+const MessageList = React.memo(({ 
+  groupedMessages, 
+  nuking, 
+  unreadMarkerId, 
+  currentUser, 
+  editingId, 
+  editText, 
+  setFullscreenImage, 
+  setInspectedFile, 
+  setInspectedVideo, 
+  handleStartEdit, 
+  onUnsend, 
+  setReplyingTo, 
+  scrollToMessage, 
+  setEditText, 
+  handleEditSubmit, 
+  handleEditCancel 
+}: MessageListProps) => {
+  return (
+    <AnimatePresence initial={false}>
+      {!nuking && groupedMessages.map(({ msg, groupInfo }, i: number) => (
+        <div key={msg.id}>
+          {unreadMarkerId === msg.id && (
+            <div className="flex items-center gap-3 my-2 px-2">
+              <div className="flex-1 unread-marker-line" />
+              <span className="text-[10px] font-mono text-foreground font-semibold shrink-0">new messages</span>
+              <div className="flex-1 unread-marker-line" />
+            </div>
+          )}
+          <MessageBubble
+            msg={msg}
+            isOwn={msg.username === currentUser}
+            currentUser={currentUser}
+            index={i}
+            groupInfo={groupInfo}
+            onImageClick={setFullscreenImage}
+            onInspectFile={setInspectedFile}
+            onInspectVideo={setInspectedVideo}
+            onEdit={handleStartEdit}
+            onUnsend={onUnsend}
+            onReply={setReplyingTo}
+            onScrollToMessage={scrollToMessage}
+            editingId={editingId}
+            editText={editText}
+            onEditTextChange={setEditText}
+            onEditSubmit={handleEditSubmit}
+            onEditCancel={handleEditCancel}
+          />
+        </div>
+      ))}
+    </AnimatePresence>
+  );
+});
 
 export function ChatArea({
   messages,
@@ -70,7 +143,6 @@ export function ChatArea({
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMarkerId, setUnreadMarkerId] = useState<string | null>(null);
-  const [notificationJiggle, setNotificationJiggle] = useState(false);
   const [inspectedFile, setInspectedFile] = useState<InspectedFile | null>(null);
   const [inspectedVideo, setInspectedVideo] = useState<InspectedVideo | null>(null);
   const [replyingTo, setReplyingTo] = useState<ReplyTo | null>(null);
@@ -78,7 +150,6 @@ export function ChatArea({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounter = useRef(0);
   const lastMessageIdRef = useRef<string | null>(null);
   const userScrolledRef = useRef(false);
@@ -135,7 +206,7 @@ export function ChatArea({
       const oldIdx = lastMessageIdRef.current
         ? messages.findIndex(m => m.id === lastMessageIdRef.current)
         : -1;
-      // New message(s) arrived
+      
       if (checkIfScrolledUp() && userScrolledRef.current) {
         if (!unreadMarkerId) {
           const firstNewMsg = messages[oldIdx + 1];
@@ -179,12 +250,6 @@ export function ChatArea({
     setEditingId(id);
     setEditText(text);
   }, []);
-
-  const handleNotificationToggle = useCallback(() => {
-    setNotificationJiggle(true);
-    setTimeout(() => setNotificationJiggle(false), 600);
-    onToggleNotifications();
-  }, [onToggleNotifications]);
 
   const handleFileUpload = useCallback(async (file: File) => {
     if (!ACCEPTED_FILE_TYPES.includes(file.type)) return;
@@ -232,61 +297,15 @@ export function ChatArea({
         </div>
       )}
 
-      {/* Header */}
-      <header className="h-14 flex items-center px-4 shrink-0 bg-card/60 backdrop-blur-xl border-b border-border/30 shadow-[0_1px_6px_rgba(0,0,0,0.4)] sticky top-0 z-20 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-white/10 after:to-transparent">
-        <button
-          onClick={() => setMobileSidebarOpen(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors md:hidden"
-        >
-          <Users className="w-4 h-4" />
-        </button>
-        {isPasswordProtected && (
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Lock className="w-3 h-3" />
-            <span className="text-[10px] font-mono">locked</span>
-          </div>
-        )}
-        <div className="flex-1 flex justify-center">
-          {/* Room code display removed per user request */}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-foreground transition-colors">
-                <ZoomIn className="w-4 h-4" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-3" side="bottom" align="end">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-muted-foreground">Scale</span>
-                  <span className="text-[11px] font-mono text-foreground">{uiScale}%</span>
-                </div>
-                <Slider
-                  value={[uiScale]}
-                  onValueChange={onScaleChange}
-                  min={100}
-                  max={150}
-                  step={5}
-                />
-              </div>
-            </PopoverContent>
-          </Popover>
-          <motion.button
-            onClick={handleNotificationToggle}
-            animate={notificationJiggle ? {
-              rotate: [0, -15, 15, -12, 12, -6, 6, -2, 2, 0],
-            } : { rotate: 0 }}
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
-            className={`w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors ${notificationsEnabled ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            {notificationsEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-          </motion.button>
-          <button onClick={onLeave} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all active:scale-[0.95] md:hidden">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
+      <ChatHeader
+        isPasswordProtected={isPasswordProtected}
+        uiScale={uiScale}
+        onScaleChange={onScaleChange}
+        notificationsEnabled={notificationsEnabled}
+        onToggleNotifications={onToggleNotifications}
+        onLeave={onLeave}
+        onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
+      />
 
       {frozen && (
         <div className="px-4 py-1.5 bg-secondary text-center">
@@ -294,9 +313,7 @@ export function ChatArea({
         </div>
       )}
 
-      {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 relative">
-        {/* Empty state */}
         {!nuking && messages.length === 0 && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
@@ -315,39 +332,24 @@ export function ChatArea({
           </motion.div>
         )}
 
-        <AnimatePresence initial={false}>
-          {!nuking && groupedMessages.map(({ msg, groupInfo }, i) => (
-              <div key={msg.id}>
-                {unreadMarkerId === msg.id && (
-                  <div className="flex items-center gap-3 my-2 px-2">
-                    <div className="flex-1 unread-marker-line" />
-                    <span className="text-[10px] font-mono text-foreground font-semibold shrink-0">new messages</span>
-                    <div className="flex-1 unread-marker-line" />
-                  </div>
-                )}
-                <MessageBubble
-                  msg={msg}
-                  isOwn={msg.username === currentUser}
-                  currentUser={currentUser}
-                  index={i}
-                  groupInfo={groupInfo}
-                  onImageClick={setFullscreenImage}
-                  onInspectFile={setInspectedFile}
-                  onInspectVideo={setInspectedVideo}
-                  onEdit={handleStartEdit}
-                  onUnsend={onUnsend}
-                  onReply={setReplyingTo}
-                  onScrollToMessage={scrollToMessage}
-                  editingId={editingId}
-                  editText={editText}
-                  onEditTextChange={setEditText}
-                  onEditSubmit={handleEditSubmit}
-                  onEditCancel={handleEditCancel}
-                />
-              </div>
-            ))}
-
-        </AnimatePresence>
+        <MessageList 
+          groupedMessages={groupedMessages}
+          nuking={nuking}
+          unreadMarkerId={unreadMarkerId}
+          currentUser={currentUser}
+          editingId={editingId}
+          editText={editText}
+          setFullscreenImage={setFullscreenImage}
+          setInspectedFile={setInspectedFile}
+          setInspectedVideo={setInspectedVideo}
+          handleStartEdit={handleStartEdit}
+          onUnsend={onUnsend}
+          setReplyingTo={setReplyingTo}
+          scrollToMessage={scrollToMessage}
+          setEditText={setEditText}
+          handleEditSubmit={handleEditSubmit}
+          handleEditCancel={handleEditCancel}
+        />
 
         {/* Nuke dissolve overlay */}
         <AnimatePresence>
@@ -402,7 +404,6 @@ export function ChatArea({
         <div ref={endRef} />
       </div>
 
-      {/* Scroll to bottom */}
       <AnimatePresence>
         {isScrolledUp && (
           <motion.button
@@ -431,7 +432,6 @@ export function ChatArea({
         )}
       </AnimatePresence>
 
-      {/* Typing indicator */}
       <AnimatePresence>
         {typingUsers.length > 0 && (
           <motion.div
@@ -451,76 +451,20 @@ export function ChatArea({
         )}
       </AnimatePresence>
 
-      {/* File input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={ACCEPTED_FILE_TYPES.join(',')}
-        className="hidden"
-        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileUpload(file); e.target.value = ''; }}
+      <ChatInput
+        input={input}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        isInputDisabled={isInputDisabled}
+        onSendGif={onSendGif}
+        replyingTo={replyingTo}
+        onCancelReply={() => setReplyingTo(null)}
+        uploading={uploading}
+        uploadProgress={uploadProgress}
+        uploadComplete={uploadComplete}
+        onFileUpload={handleFileUpload}
       />
 
-      {/* Reply preview bar */}
-      {replyingTo && (
-        <ReplyPreview replyTo={replyingTo} onCancel={() => setReplyingTo(null)} />
-      )}
-
-      {/* Input bar */}
-      <form onSubmit={handleSubmit} className="p-3 shrink-0 relative">
-        {uploading && (
-          <div className="absolute top-0 left-3 right-3 h-[1px] bg-muted overflow-hidden">
-            <motion.div
-              className={`h-full bg-foreground ${uploadComplete ? '' : 'animate-pulse'}`}
-              initial={{ width: '0%' }}
-              animate={{
-                width: `${uploadProgress}%`,
-                opacity: uploadComplete ? [1, 1, 0] : 1,
-              }}
-              transition={{
-                width: { duration: 0.2 },
-                opacity: uploadComplete ? { duration: 0.4, times: [0, 0.5, 1] } : undefined,
-              }}
-            />
-          </div>
-        )}
-        <div className="flex gap-1 items-center border border-white/10 focus-within:border-white/20 rounded-xl bg-black/60 backdrop-blur-md px-1.5 transition-colors duration-300">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isInputDisabled}
-            className="p-2.5 text-muted-foreground hover:text-foreground hover:-rotate-12 transition-all active:scale-[0.95] disabled:opacity-20 disabled:cursor-not-allowed"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-          <GifPicker onSelect={onSendGif} disabled={isInputDisabled} />
-          <input
-            type="text"
-            value={input}
-            onChange={handleInputChange}
-            placeholder={isInputDisabled ? 'Chat is frozen' : 'Message'}
-            disabled={isInputDisabled}
-            className="flex-1 bg-transparent py-2.5 px-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            maxLength={2000}
-          />
-          {input.length > 1800 && (
-            <span className={`text-[10px] font-mono pr-2 transition-colors ${input.length > 1950 ? 'text-destructive' : 'text-muted-foreground/60'}`}>
-              {input.length}/2000
-            </span>
-          )}
-          <motion.button
-            type="submit"
-            disabled={!input.trim() || isInputDisabled}
-            className={`p-2.5 rounded-lg transition-all disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center text-foreground ${
-              input.trim() ? 'bg-white/15 hover:bg-white/25' : 'bg-transparent'
-            }`}
-            whileTap={{ scale: 0.9, rotate: -12 }}
-          >
-            <Send className="w-4 h-4 ml-0.5" />
-          </motion.button>
-        </div>
-      </form>
-
-      {/* Fullscreen image viewer */}
       {fullscreenImage && (
         <FullscreenImageViewer
           imageUrl={fullscreenImage}
@@ -528,7 +472,6 @@ export function ChatArea({
         />
       )}
 
-      {/* File inspector */}
       <AnimatePresence>
         {inspectedFile && (
           <FileInspector
@@ -538,7 +481,6 @@ export function ChatArea({
         )}
       </AnimatePresence>
 
-      {/* Video inspector */}
       <AnimatePresence>
         {inspectedVideo && (
           <VideoInspector
@@ -548,7 +490,6 @@ export function ChatArea({
         )}
       </AnimatePresence>
 
-      {/* Mobile sidebar sheet */}
       <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
         <SheetContent side="left" className="p-0 w-56">
           <SheetTitle className="sr-only">Users</SheetTitle>

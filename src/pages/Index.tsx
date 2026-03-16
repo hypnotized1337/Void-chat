@@ -32,7 +32,7 @@ const Index = () => {
     return () => { document.documentElement.style.fontSize = ''; };
   }, [uiScale]);
 
-  const handleSend = (text: string, replyTo?: { id: string; username: string; text: string }) => {
+  const handleSend = useCallback((text: string, replyTo?: { id: string; username: string; text: string }) => {
     if (text.trim() === '/admin') {
       if (sessionStorage.getItem('is_admin') === 'true') {
         setAdminOpen(true);
@@ -42,7 +42,7 @@ const Index = () => {
       return;
     }
     sendMessage(text, replyTo);
-  };
+  }, [sendMessage]);
 
   const handleNuke = useCallback(() => {
     setAdminOpen(false);
