@@ -10,7 +10,7 @@ A minimalist, account-free, ephemeral chat application. No sign-ups, no tracking
 
 | Join Screen | Chat View |
 |:-----------:|:---------:|
-| ![Join Screen](public/screenshots/join-screen.png) | ![Chat View](public/screenshots/chat-view.png) |
+| <img src="public/screenshots/join-screen.png" width="400" alt="Join Screen" /> | <img src="public/screenshots/chat-view.png" width="400" alt="Chat View" /> |
 
 ---
 
@@ -47,11 +47,6 @@ npm install
 
 # Start dev server
 npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173), enter a username and room code, and start chatting.
-
----
 
 ## License
 

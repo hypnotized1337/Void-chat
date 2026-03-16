@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2, GitCommit, Sparkles, Lock, Plus, LogIn } from 'lucide-react';
+import { ArrowRight, Loader2, GitCommit, Sparkles, Lock, Plus, LogIn, Github } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
@@ -544,18 +544,29 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
             Everything is deleted on exit · nothing stored
           </motion.p>
           <motion.div
-            className="flex items-center justify-center gap-5 pt-3"
+            className="flex flex-col items-center justify-center gap-4 pt-3"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 1.0 }}>
-
-            <Link to="/changelog" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-white font-mono transition-colors">
-              <GitCommit className="w-3.5 h-3.5" /> changelog
-            </Link>
-            <div className="w-1 h-1 rounded-full bg-white/20 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-            <Link to="/features" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-white font-mono transition-colors">
-              <Sparkles className="w-3.5 h-3.5" /> features
-            </Link>
+            
+            <div className="flex items-center gap-5">
+              <Link to="/changelog" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-white font-mono transition-colors">
+                <GitCommit className="w-3.5 h-3.5" /> changelog
+              </Link>
+              <div className="w-1 h-1 rounded-full bg-white/20 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+              <Link to="/features" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-white font-mono transition-colors">
+                <Sparkles className="w-3.5 h-3.5" /> features
+              </Link>
+            </div>
+            
+            <a 
+              href="https://github.com/hypnotized1337/Void-chat" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/30 hover:text-white/80 font-mono transition-colors mt-2"
+            >
+              <Github className="w-4 h-4" />
+            </a>
           </motion.div>
         </motion.form>
       </LayoutGroup>
