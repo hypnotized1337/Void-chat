@@ -41,46 +41,12 @@ A minimalist, account-free, ephemeral chat application. No sign-ups, no tracking
 
 ## Getting Started
 
-### Development & Contributing
+```bash
+# Install dependencies
+npm install
 
-Since V0ID Chat is built on Supabase for real-time features and edge functions, you must link your own Supabase project to run the application locally. All sensitive keys have been removed from this repository.
-
-1. **Clone & Install**
-   ```bash
-   git clone https://github.com/hypnotized1337/Void-chat.git
-   cd Void-chat
-   npm install
-   ```
-
-2. **Supabase Setup**
-   - Create a new project on [Supabase](https://supabase.com).
-   - In your Supabase dashboard, locate your Project URL and Anon/Publishable Key.
-   - Copy the `.env.example` file and rename it to `.env`.
-   - Fill in the variables in `.env` with your project's specific keys:
-     ```env
-     VITE_SUPABASE_PROJECT_ID="your-project-id"
-     VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-key"
-     VITE_SUPABASE_URL="https://your-project.supabase.co"
-     ```
-
-3. **Link the CLI & Push Database/Functions**
-   - Ensure you have the [Supabase CLI](https://supabase.com/docs/guides/cli) installed.
-   - Link your local project to your remote Supabase project:
-     ```bash
-     npx supabase link --project-ref your-project-id
-     ```
-   - Push the database schemas and deploy the edge functions:
-     ```bash
-     npx supabase db push
-     npx supabase functions deploy
-     ```
-
-4. **Run the App**
-   ```bash
-   npm run dev
-   ```
-
----
+# Start dev server
+npm run dev
 
 ## License
 
