@@ -233,12 +233,12 @@ export function ChatArea({
       )}
 
       {/* Header — IDE tab bar */}
-      <header className="h-8 flex items-center px-2 shrink-0 bg-secondary/50 border-b border-border sticky top-0 z-20">
+      <header className="h-10 flex items-center px-3 shrink-0 bg-secondary/50 border-b border-border sticky top-0 z-20">
         <button
           onClick={() => setMobileSidebarOpen(true)}
-          className="w-6 h-6 flex items-center justify-center rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-colors md:hidden"
+          className="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-colors md:hidden"
         >
-          <Users className="w-3.5 h-3.5" />
+          <Users className="w-4 h-4" />
         </button>
         {isPasswordProtected && (
           <div className="flex items-center gap-1 text-muted-foreground">
@@ -252,8 +252,8 @@ export function ChatArea({
         <div className="flex items-center gap-1">
           <Popover>
             <PopoverTrigger asChild>
-              <button className="w-6 h-6 flex items-center justify-center rounded-sm hover:bg-muted text-foreground transition-colors">
-                <ZoomIn className="w-3.5 h-3.5" />
+              <button className="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-muted text-foreground transition-colors">
+                <ZoomIn className="w-4 h-4" />
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-48 p-3" side="bottom" align="end">
@@ -278,11 +278,11 @@ export function ChatArea({
               rotate: [0, -15, 15, -12, 12, -6, 6, -2, 2, 0],
             } : { rotate: 0 }}
             transition={{ duration: 0.6, ease: 'easeInOut' }}
-            className={`w-6 h-6 flex items-center justify-center rounded-sm hover:bg-muted transition-colors ${notificationsEnabled ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`w-7 h-7 flex items-center justify-center rounded-sm hover:bg-muted transition-colors ${notificationsEnabled ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
           >
-            {notificationsEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
+            {notificationsEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
           </motion.button>
-          <button onClick={onLeave} className="w-6 h-6 flex items-center justify-center rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-[0.95] md:hidden">
+          <button onClick={onLeave} className="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-[0.95] md:hidden">
             <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -295,7 +295,7 @@ export function ChatArea({
       )}
 
       {/* Messages */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-thin px-3 py-2 relative">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-3 relative">
         {/* Empty state */}
         {!nuking && messages.length === 0 && (
           <motion.div
@@ -466,7 +466,7 @@ export function ChatArea({
       )}
 
       {/* Input bar */}
-      <form onSubmit={handleSubmit} className="px-2 py-2 shrink-0 relative">
+      <form onSubmit={handleSubmit} className="px-3 py-3 shrink-0 relative">
         {uploading && (
           <div className="absolute top-0 left-3 right-3 h-[1px] bg-muted overflow-hidden">
             <motion.div
@@ -483,23 +483,23 @@ export function ChatArea({
             />
           </div>
         )}
-        <div className="flex gap-1 items-center border border-border focus-within:border-ring/50 rounded-sm bg-input px-1.5 transition-colors duration-200">
+        <div className="flex gap-1 items-center border border-border focus-within:border-ring/50 rounded-sm bg-input px-2 transition-colors duration-200">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isInputDisabled}
-            className="p-2.5 text-muted-foreground hover:text-foreground hover:-rotate-12 transition-all active:scale-[0.95] disabled:opacity-20 disabled:cursor-not-allowed"
+            className="p-3 text-muted-foreground hover:text-foreground hover:-rotate-12 transition-all active:scale-[0.95] disabled:opacity-20 disabled:cursor-not-allowed"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
           </button>
           <GifPicker onSelect={onSendGif} disabled={isInputDisabled} />
           <input
             type="text"
             value={input}
             onChange={handleInputChange}
-            placeholder={isInputDisabled ? 'Chat is frozen' : 'Message'}
+            placeholder={isInputDisabled ? 'Chat is frozen' : 'Message...'}
             disabled={isInputDisabled}
-            className="flex-1 bg-transparent py-2.5 px-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex-1 bg-transparent py-3 px-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             maxLength={2000}
           />
           {input.length > 1800 && (
@@ -510,12 +510,12 @@ export function ChatArea({
           <motion.button
             type="submit"
             disabled={!input.trim() || isInputDisabled}
-            className={`p-2 rounded-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center ${
+            className={`p-2.5 rounded-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center ${
               input.trim() ? 'bg-primary/20 text-primary hover:bg-primary/30' : 'text-muted-foreground bg-transparent'
             }`}
             whileTap={{ scale: 0.9, rotate: -12 }}
           >
-            <Send className="w-4 h-4 ml-0.5" />
+            <Send className="w-5 h-5 ml-0.5" />
           </motion.button>
         </div>
       </form>

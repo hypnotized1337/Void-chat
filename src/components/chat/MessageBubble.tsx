@@ -186,9 +186,9 @@ export const MessageBubble = memo(function MessageBubble({
   const radiusClass = getBubbleRadius(isOwn, groupInfo);
 
   const bubble = (
-    <div className={`max-w-[85%] space-y-0.5 ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
+    <div className={`max-w-[92%] space-y-1 ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
       {showUsername && (
-        <span className="text-[11px] text-muted-foreground ml-1">{msg.username}</span>
+        <span className="text-xs text-muted-foreground ml-1.5 font-medium">{msg.username}</span>
       )}
 
       {msg.replyTo && (
@@ -216,7 +216,7 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       ) : (
         <div
-          className={`px-3 py-1.5 text-[13px] leading-relaxed transition-all duration-150 w-fit max-w-full select-none rounded-sm ${
+          className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-150 w-fit max-w-full select-none rounded-sm ${
             isOwn
               ? 'bg-message-own text-message-own-foreground border border-primary/20'
               : 'bg-message-other text-message-other-foreground border border-border/50'
@@ -253,8 +253,8 @@ export const MessageBubble = memo(function MessageBubble({
       )}
 
       {groupInfo.isLastInGroup && (
-        <div className={`flex items-center gap-1 ${isOwn ? 'justify-end mr-1' : 'ml-1'}`}>
-          <span className="text-[10px] text-muted-foreground">{formatTime(msg.timestamp)}</span>
+        <div className={`flex items-center gap-1.5 ${isOwn ? 'justify-end mr-1.5' : 'ml-1.5'}`}>
+          <span className="text-xs text-muted-foreground">{formatTime(msg.timestamp)}</span>
           {msg.edited && <span className="text-[10px] text-muted-foreground">· edited</span>}
           {isOwn && msg.status && <StatusIcon status={msg.status} />}
           <SelfDestructTimer timestamp={msg.timestamp} />
@@ -286,7 +286,7 @@ export const MessageBubble = memo(function MessageBubble({
       initial="hidden"
       animate="visible"
       custom={index}
-      className={groupInfo.isFirstInGroup ? 'mt-1.5' : 'mt-px'}
+      className={groupInfo.isFirstInGroup ? 'mt-3' : 'mt-1'}
     >
       <ContextMenu>
         <ContextMenuTrigger asChild>
