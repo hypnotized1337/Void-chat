@@ -31,7 +31,7 @@ export function ChatSidebar({ roomCode, users, currentUser, onLeave, className }
   return (
     <div className={`w-64 h-full bg-sidebar flex flex-col shrink-0 border-r border-sidebar-border ${className ?? 'hidden md:flex'}`}>
       {/* Tool window title bar */}
-      <div className="h-9 flex items-center px-3 bg-secondary/50 border-b border-sidebar-border shrink-0">
+      <div className="h-10 flex items-center px-3 bg-secondary/50 border-b border-sidebar-border shrink-0">
         <span className="text-xs font-mono text-sidebar-foreground uppercase tracking-wider">Room</span>
       </div>
 
@@ -84,7 +84,7 @@ export function ChatSidebar({ roomCode, users, currentUser, onLeave, className }
         </div>
       </div>
 
-      <div className="p-2 border-t border-sidebar-border">
+      <div className="h-[70px] flex items-center px-3 border-t border-sidebar-border shrink-0">
         <button
           onClick={onLeave}
           className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-all duration-200 active:scale-[0.97] py-1.5 rounded-sm hover:bg-destructive/20 font-mono"
