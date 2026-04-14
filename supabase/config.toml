@@ -1,0 +1,10 @@
+project_id = "wqhceghaxjdmxouoyqse"
+
+[functions.summarize-changelog]
+verify_jwt = false
+
+[functions.summarize-features]
+verify_jwt = false
+
+[functions.og-metadata]
+verify_jwt = false
