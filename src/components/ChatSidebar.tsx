@@ -15,13 +15,12 @@ function UserAvatar({ username, isYou }: { username: string; isYou: boolean }) {
   const initial = username.charAt(0).toUpperCase();
   return (
     <div className="relative">
-      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-medium shrink-0 ${
-        isYou ? 'bg-foreground text-background ring-2 ring-white/10' : 'bg-muted text-muted-foreground ring-1 ring-border/50'
+      <div className={`w-5 h-5 rounded-sm flex items-center justify-center text-[9px] font-mono font-medium shrink-0 ${
+        isYou ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
       }`}>
         {initial}
       </div>
-      {/* Online indicator dot */}
-      <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-background ${isYou ? 'bg-green-500' : 'bg-white/40'}`} />
+      <div className={`absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-sidebar ${isYou ? 'bg-online' : 'bg-muted-foreground/40'}`} />
     </div>
   );
 }
