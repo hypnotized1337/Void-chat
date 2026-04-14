@@ -186,7 +186,7 @@ export const MessageBubble = memo(function MessageBubble({
   const radiusClass = getBubbleRadius(isOwn, groupInfo);
 
   const bubble = (
-    <div className={`max-w-[75%] space-y-0.5 ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
+    <div className={`max-w-[85%] space-y-0.5 ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
       {showUsername && (
         <span className="text-[11px] text-muted-foreground ml-1">{msg.username}</span>
       )}
@@ -216,7 +216,7 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
       ) : (
         <div
-          className={`px-3.5 py-2 text-[13px] leading-relaxed transition-all duration-150 w-fit max-w-full select-none rounded-sm ${
+          className={`px-3 py-1.5 text-[13px] leading-relaxed transition-all duration-150 w-fit max-w-full select-none rounded-sm ${
             isOwn
               ? 'bg-message-own text-message-own-foreground border border-primary/20'
               : 'bg-message-other text-message-other-foreground border border-border/50'
@@ -286,7 +286,7 @@ export const MessageBubble = memo(function MessageBubble({
       initial="hidden"
       animate="visible"
       custom={index}
-      className={groupInfo.isFirstInGroup ? 'mt-2' : 'mt-0.5'}
+      className={groupInfo.isFirstInGroup ? 'mt-1.5' : 'mt-px'}
     >
       <ContextMenu>
         <ContextMenuTrigger asChild>
